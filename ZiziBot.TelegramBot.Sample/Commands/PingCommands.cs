@@ -7,8 +7,8 @@ namespace ZiziBot.TelegramBot.Sample.Commands;
 public class PingCommands : BotCommandController
 {
     [Command("ping")]
-    public void PingCommand()
+    public void PingCommand(CommandData data)
     {
-        // data.BotClient.SendTextMessageAsync(data.Message.Chat.Id, "Pong!");
+        data.BotClient.SendTextMessageAsync(data.Message.Chat.Id, "Pong!");
     }
 }

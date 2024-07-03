@@ -22,6 +22,15 @@ public static class ClientExtension
             return botCommandCollection;
         });
 
+        using (var provider = services.BuildServiceProvider())
+        {
+            var botConfigurations = new List<BotConfiguration>();
+            var configuration = provider.GetRequiredService<IConfiguration>();
+            configuration.GetSection(BotConfiguration.ConfigPath).Bind(botConfigurations);
+
+            services.AddSingleton(botConfigurations);
+        }
+
         services.AddSingleton<BotMessageHandler>();
         services.AddSingleton<BotClientCollection>();
         services.AddSingleton<IBotEngine, BotPollingEngine>();

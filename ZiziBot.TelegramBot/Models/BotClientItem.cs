@@ -8,7 +8,7 @@ public class BotClientItem
     public required ITelegramBotClient Client { get; set; }
     public CancellationTokenSource? CancellationTokenSource { get; set; }
 
-    public static BotClientItem CreateClient(string name, TelegramBotClientOptions options, CancellationTokenSource? source = null)
+    public static BotClientItem Create(string name, TelegramBotClientOptions options, CancellationTokenSource? source = null)
     {
         source ??= new CancellationTokenSource();
         return new BotClientItem

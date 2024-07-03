@@ -4,16 +4,18 @@ using ZiziBot.TelegramBot.Models;
 
 namespace ZiziBot.TelegramBot.Workers;
 
-public class BotPollingEngineWorker(ILogger<BotPollingEngineWorker> logger, BotClientCollection botClientCollection, IBotEngine botEngine) : BackgroundService
+public class BotPollingEngineWorker(
+    ILogger<BotPollingEngineWorker> logger,
+    List<BotConfiguration> botConfigurations,
+    IBotEngine botEngine
+) : BackgroundService
 {
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
-            botEngine.Start(new[]
-            {
-                BotClientItem.CreateClient("Main", new TelegramBotClientOptions("YOUR_BOT_TOKEN"))
-            });
+            var clients = botConfigurations.Select(x => BotClientItem.Create(x.Name, new TelegramBotClientOptions(x.Token)));
+            botEngine.Start(clients);
         }
         catch (Exception exception)
         {

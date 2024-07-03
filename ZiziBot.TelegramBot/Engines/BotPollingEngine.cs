@@ -7,7 +7,11 @@ using ZiziBot.TelegramBot.Models;
 
 namespace ZiziBot.TelegramBot.Engines;
 
-public class BotPollingEngine(ILogger<BotPollingEngine> logger, BotClientCollection botClientCollection, BotMessageHandler botMessageHandler) : IBotEngine
+public class BotPollingEngine(
+    ILogger<BotPollingEngine> logger,
+    BotClientCollection botClientCollection,
+    BotMessageHandler botMessageHandler
+) : IBotEngine
 {
     public async Task Start(BotClientItem clients)
     {
