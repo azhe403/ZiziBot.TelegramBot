@@ -88,7 +88,7 @@ public class BotMessageHandler(IServiceProvider provider, ILogger<BotMessageHand
 
     private (MethodInfo method, string) GetMethodByPath(IEnumerable<MethodInfo> methods, Message message)
     {
-        var foundMethods = methods.Where(x => x.GetCommandAttributes().Any(a => message.Text!.Equals($"/{a.Path}"))).ToArray();
+        var foundMethods = methods.Where(x => x.GetCommandAttributes().Any(a => message.Text?.Equals($"/{a.Path}") ?? false)).ToArray();
 
         var method = foundMethods.Length > 0 ?
             foundMethods.SingleOrDefault(f => f.GetCommandAttributes().Any()) :

@@ -1,12 +1,13 @@
 ﻿using Telegram.Bot;
 using ZiziBot.TelegramBot.Interfaces;
 using ZiziBot.TelegramBot.Models;
+using ZiziBot.TelegramBot.Models.Configs;
 
 namespace ZiziBot.TelegramBot.Workers;
 
 public class BotPollingEngineWorker(
     ILogger<BotPollingEngineWorker> logger,
-    List<BotConfiguration> botConfigurations,
+    List<BotConfig> botConfigurations,
     IBotEngine botEngine
 ) : BackgroundService
 {

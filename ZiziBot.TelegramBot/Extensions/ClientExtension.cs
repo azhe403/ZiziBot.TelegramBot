@@ -2,6 +2,7 @@
 using ZiziBot.TelegramBot.Handlers;
 using ZiziBot.TelegramBot.Interfaces;
 using ZiziBot.TelegramBot.Models;
+using ZiziBot.TelegramBot.Models.Configs;
 using ZiziBot.TelegramBot.Workers;
 
 namespace ZiziBot.TelegramBot.Extensions;
@@ -24,10 +25,14 @@ public static class ClientExtension
 
         using (var provider = services.BuildServiceProvider())
         {
-            var botConfigurations = new List<BotConfiguration>();
+            var engineConfig = new BotEngineConfig();
+            var botConfigurations = new List<BotConfig>();
             var configuration = provider.GetRequiredService<IConfiguration>();
-            configuration.GetSection(BotConfiguration.ConfigPath).Bind(botConfigurations);
 
+            configuration.GetSection(BotConfig.ConfigPath).Bind(botConfigurations);
+            configuration.GetSection(BotEngineConfig.ConfigPath).Bind(engineConfig);
+
+            services.AddSingleton(engineConfig);
             services.AddSingleton(botConfigurations);
         }
 

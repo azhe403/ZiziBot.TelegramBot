@@ -15,16 +15,23 @@ public class BotPollingEngine(
 {
     public async Task Start(BotClientItem clients)
     {
-        if (botClientCollection.Items.Exists(x => x.Name == clients.Name))
+        try
         {
-            logger.LogWarning("Bot polling engine is already running");
-            return;
+            if (botClientCollection.Items.Exists(x => x.Name == clients.Name))
+            {
+                logger.LogWarning("Bot polling engine is already running");
+                return;
+            }
+
+            await clients.Client.DeleteWebhookAsync();
+
+            clients.Client.StartReceiving(UpdateHandler, ErrorHandler);
+            botClientCollection.Items.Add(clients);
         }
-
-        await clients.Client.DeleteWebhookAsync();
-
-        clients.Client.StartReceiving(UpdateHandler, ErrorHandler);
-        botClientCollection.Items.Add(clients);
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Error starting Polling bot. Name: {Name}", clients.Name);
+        }
     }
 
     public async Task Start(IEnumerable<BotClientItem> clients)
