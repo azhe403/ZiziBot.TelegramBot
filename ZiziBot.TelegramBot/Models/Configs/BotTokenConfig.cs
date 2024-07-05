@@ -1,6 +1,6 @@
 ﻿namespace ZiziBot.TelegramBot.Models.Configs;
 
-public class BotConfig
+public class BotTokenConfig
 {
     public const string ConfigPath = "BotEngine:Bot";
 

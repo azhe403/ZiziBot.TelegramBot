@@ -9,5 +9,5 @@ public class BotEngineConfig
     public string WebhookUrl { get; set; }
     public BotEngineMode EngineMode { get; set; }
 
-    public BotConfig[] Bot { get; set; }
+    public BotTokenConfig[] Bot { get; set; }
 }

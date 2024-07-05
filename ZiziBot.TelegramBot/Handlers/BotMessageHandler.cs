@@ -3,7 +3,7 @@ using Allowed.Telegram.Bot.Helpers;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using ZiziBot.TelegramBot.Helpers;
+using ZiziBot.TelegramBot.Attributes;
 using ZiziBot.TelegramBot.Models;
 
 namespace ZiziBot.TelegramBot.Handlers;
@@ -47,8 +47,8 @@ public class BotMessageHandler(IServiceProvider provider, ILogger<BotMessageHand
 
             if (methodParams.Any(x => x.ParameterType == typeof(CommandData)))
             {
-                paramList = new List<object>
-                {
+                paramList =
+                [
                     new CommandData()
                     {
                         BotClient = client,
@@ -57,7 +57,7 @@ public class BotMessageHandler(IServiceProvider provider, ILogger<BotMessageHand
                         FromUser = message.From,
                         Params = method.Params
                     }
-                };
+                ];
             }
 
             var controller = (BotCommandController)ActivatorUtilities.CreateInstance(provider, method.ControllerType);
@@ -88,11 +88,10 @@ public class BotMessageHandler(IServiceProvider provider, ILogger<BotMessageHand
 
     private (MethodInfo method, string) GetMethodByPath(IEnumerable<MethodInfo> methods, Message message)
     {
-        var foundMethods = methods.Where(x => x.GetCommandAttributes().Any(a => message.Text?.Equals($"/{a.Path}") ?? false)).ToArray();
-
-        var method = foundMethods.Length > 0 ?
-            foundMethods.SingleOrDefault(f => f.GetCommandAttributes().Any()) :
-            foundMethods.SingleOrDefault();
+        var method = methods.FirstOrDefault(x =>
+            x.GetCustomAttributes<CommandAttribute>().Any(a => message.Text?.Equals($"/{a.Path}") ?? false) ||
+            x.GetCustomAttributes<TextCommandAttribute>().Any(a => message.Text?.Equals(a.Command) ?? false)
+        );
 
         return method != null ?
             (method, string.Join(" ", message.Text!.Split(" ").Skip(1))) :

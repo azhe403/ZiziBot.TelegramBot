@@ -5,9 +5,9 @@ using ZiziBot.TelegramBot.Models.Configs;
 
 namespace ZiziBot.TelegramBot.Workers;
 
-public class BotPollingEngineWorker(
-    ILogger<BotPollingEngineWorker> logger,
-    List<BotConfig> botConfigurations,
+public class BotEngineWorker(
+    ILogger<BotEngineWorker> logger,
+    List<BotTokenConfig> botConfigurations,
     IBotEngine botEngine
 ) : BackgroundService
 {
