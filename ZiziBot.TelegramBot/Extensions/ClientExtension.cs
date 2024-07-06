@@ -1,4 +1,11 @@
-﻿using Telegram.Bot.Types;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Telegram.Bot.Types;
 using ZiziBot.TelegramBot.Engines;
 using ZiziBot.TelegramBot.Handlers;
 using ZiziBot.TelegramBot.Interfaces;

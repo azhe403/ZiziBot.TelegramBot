@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
 using Allowed.Telegram.Bot.Helpers;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;

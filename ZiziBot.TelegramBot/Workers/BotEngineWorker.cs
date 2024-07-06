@@ -1,4 +1,6 @@
-﻿using Telegram.Bot;
+﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Telegram.Bot;
 using ZiziBot.TelegramBot.Interfaces;
 using ZiziBot.TelegramBot.Models;
 using ZiziBot.TelegramBot.Models.Configs;
@@ -20,7 +22,7 @@ public class BotEngineWorker(
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "Error starting Polling bot");
+            logger.LogError(exception, "Error starting Bot");
             throw;
         }
 
