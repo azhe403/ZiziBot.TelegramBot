@@ -1,11 +1,11 @@
 ﻿using System.Reflection;
-using Allowed.Telegram.Bot.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using ZiziBot.TelegramBot.Attributes;
+using ZiziBot.TelegramBot.Helpers;
 using ZiziBot.TelegramBot.Models;
 
 namespace ZiziBot.TelegramBot.Handlers;
@@ -14,12 +14,14 @@ public class BotMessageHandler(IServiceProvider provider, ILogger<BotMessageHand
 {
     public async Task<object?> Handle(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
-        return update.Type switch
+        var result = update.Type switch
         {
-            UpdateType.Message => await OnMessage(botClient, update.Message!, token),
-            UpdateType.EditedMessage => await OnMessage(botClient, update.EditedMessage!, token),
+            UpdateType.Message => await OnMessage(botClient, update, token),
+            UpdateType.EditedMessage => await OnMessage(botClient, update, token),
             _ => await OnUpdate(botClient, update, token)
         };
+
+        return result;
     }
 
     private async Task<object?> OnUpdate(ITelegramBotClient botClient, Update update, CancellationToken token)
@@ -39,11 +41,20 @@ public class BotMessageHandler(IServiceProvider provider, ILogger<BotMessageHand
         return default;
     }
 
-    private async Task<object?> OnMessage(ITelegramBotClient botClient, Message updateMessage, CancellationToken token)
+    private async Task<object?> OnMessage(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
         try
         {
-            var method = GetMethodByPath(updateMessage);
+            var message = update.Message ?? update.EditedMessage;
+            var method = GetMethodByPath(message!);
+            if (method == null)
+            {
+                logger.LogDebug("No handler for this update: {Update}", update.Id);
+                return default;
+            }
+
+            method.Update = update;
+
             var invokeMethod = await InvokeMethod(botClient, method);
 
             return invokeMethod;
@@ -72,8 +83,6 @@ public class BotMessageHandler(IServiceProvider provider, ILogger<BotMessageHand
                         BotClient = client,
                         Update = botCommandInfo.Update,
                         Message = botCommandInfo.Message,
-                        Chat = botCommandInfo.Message?.Chat,
-                        FromUser = botCommandInfo.Message?.From,
                         Params = botCommandInfo.Params
                     }
                 ];

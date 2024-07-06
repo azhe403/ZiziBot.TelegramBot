@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace ZiziBot.TelegramBot.Models;
+﻿namespace ZiziBot.TelegramBot.Models;
 
 public class BotCommandCollection
 {

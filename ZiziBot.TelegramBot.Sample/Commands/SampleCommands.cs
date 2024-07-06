@@ -1,5 +1,6 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.InlineQueryResults;
 using ZiziBot.TelegramBot.Attributes;
 using ZiziBot.TelegramBot.Models;
 
@@ -11,30 +12,39 @@ public class SampleCommands : BotCommandController
     [TextCommand("ping")]
     public async Task PingCommand(CommandData data)
     {
-        await data.BotClient.SendTextMessageAsync(data.Message.Chat.Id, "Pong!");
+        await data.BotClient.SendTextMessageAsync(data.Chat, "Pong!");
     }
 
     [Command("start")]
     public async Task StartCommand(CommandData data)
     {
-        await data.BotClient.SendTextMessageAsync(data.Message.Chat.Id, "Let's start!");
+        await data.BotClient.SendTextMessageAsync(data.Chat, "Let's start!");
     }
 
     [TextCommand("mulai")]
     public async Task MulaiCommand(CommandData data)
     {
-        await data.BotClient.SendTextMessageAsync(data.Message.Chat.Id, "Mari kita mulai!");
+        await data.BotClient.SendTextMessageAsync(data.Chat, "Mari kita mulai!");
     }
 
     [TypedCommand(MessageType.NewChatMembers)]
     public async Task NewChatMembersCommand(CommandData data)
     {
-        await data.BotClient.SendTextMessageAsync(data.Message.Chat.Id, "Halo!");
+        await data.BotClient.SendTextMessageAsync(data.Chat, "Halo!");
     }
 
     [Update(UpdateType.ChatJoinRequest)]
     public async Task ChatJoinRequestCommand(CommandData data)
     {
-        await data.BotClient.SendTextMessageAsync(data.Update.ChatJoinRequest.Chat.Id, "Chat join request!");
+        await data.BotClient.SendTextMessageAsync(data.Chat, "Chat join request!");
+    }
+
+    [Update(UpdateType.InlineQuery)]
+    public async Task InlineQueryCommand(CommandData data)
+    {
+        await data.BotClient.AnswerInlineQueryAsync(data.InlineQueryId, new List<InlineQueryResult>()
+        {
+            new InlineQueryResultArticle("aa576dec-0727-4ea1-99ae-3c7cb20ea3c8", "Sample Inline", new InputTextMessageContent("Inline Content"))
+        });
     }
 }

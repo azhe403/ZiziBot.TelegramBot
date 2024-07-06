@@ -5,9 +5,9 @@ namespace ZiziBot.TelegramBot.Models;
 
 public class BotCommandInfo
 {
-    public Type ControllerType { get; set; }
-    public MethodInfo Method { get; set; }
-    public Update Update { get; set; }
-    public Message Message { get; set; }
-    public string Params { get; set; }
+    public required Type ControllerType { get; set; }
+    public required MethodInfo Method { get; set; }
+    public Update? Update { get; set; }
+    public Message? Message { get; set; }
+    public string? Params { get; set; }
 }

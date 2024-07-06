@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace Allowed.Telegram.Bot.Helpers;
+namespace ZiziBot.TelegramBot.Helpers;
 
 public static class MethodHelper
 {
@@ -16,11 +16,11 @@ public static class MethodHelper
         {
             if (method.ReturnType == typeof(Task))
             {
-                await (Task)method.Invoke(instance, parameters.ToArray());
+                await ((Task)method.Invoke(instance, parameters.ToArray()))!;
                 return null;
             }
 
-            return await (Task<object?>)method.Invoke(instance, parameters.ToArray());
+            return await ((Task<object?>)method.Invoke(instance, parameters.ToArray()))!;
         }
 
         return method.Invoke(instance, parameters.ToArray());

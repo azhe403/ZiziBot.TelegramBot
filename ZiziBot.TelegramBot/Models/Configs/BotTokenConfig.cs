@@ -4,6 +4,6 @@ public class BotTokenConfig
 {
     public const string ConfigPath = "BotEngine:Bot";
 
-    public string Name { get; set; }
-    public string Token { get; set; }
+    public required string Name { get; set; }
+    public required string Token { get; set; }
 }

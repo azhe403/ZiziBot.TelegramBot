@@ -6,8 +6,8 @@ public class BotEngineConfig
 {
     public const string ConfigPath = "BotEngine";
 
-    public string WebhookUrl { get; set; }
+    public string? WebhookUrl { get; set; }
     public BotEngineMode EngineMode { get; set; }
 
-    public BotTokenConfig[] Bot { get; set; }
+    public BotTokenConfig[]? Bot { get; set; }
 }
