@@ -104,7 +104,7 @@ public static class ClientExtension
 
             logger.LogDebug("Receiving update webhook engine. UpdateId: {UpdateId}", update.Id);
 
-            await botMessageHandler.OnUpdate(client.Client, update, default);
+            await botMessageHandler.Handle(client.Client, update, default);
             await context.Response.WriteAsync("OK");
         });
 

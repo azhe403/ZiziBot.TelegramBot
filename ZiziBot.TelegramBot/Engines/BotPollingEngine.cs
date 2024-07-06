@@ -71,6 +71,6 @@ public class BotPollingEngine(
     private async Task UpdateHandler(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
         logger.LogDebug("Receiving update polling engine. UpdateId: {UpdateId}", update.Id);
-        await botMessageHandler.OnUpdate(botClient, update, token);
+        await botMessageHandler.Handle(botClient, update, token);
     }
 }

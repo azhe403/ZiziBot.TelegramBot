@@ -12,21 +12,22 @@ namespace ZiziBot.TelegramBot.Handlers;
 
 public class BotMessageHandler(IServiceProvider provider, ILogger<BotMessageHandler> logger, BotCommandCollection commandCollection)
 {
-    public async Task<object?> OnUpdate(ITelegramBotClient botClient, Update update, CancellationToken token)
+    public async Task<object?> Handle(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
         return update.Type switch
         {
             UpdateType.Message => await OnMessage(botClient, update.Message!, token),
             UpdateType.EditedMessage => await OnMessage(botClient, update.EditedMessage!, token),
-            _ => default
+            _ => await OnUpdate(botClient, update, token)
         };
     }
 
-    private async Task<object?> OnMessage(ITelegramBotClient botClient, Message updateMessage, CancellationToken token)
+    private async Task<object?> OnUpdate(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
         try
         {
-            var invokeMethod = await InvokeMethod(botClient, UpdateType.Message, updateMessage);
+            var method = GetMethodByUpdate(update);
+            var invokeMethod = await InvokeMethod(botClient, method);
 
             return invokeMethod;
         }
@@ -38,14 +39,29 @@ public class BotMessageHandler(IServiceProvider provider, ILogger<BotMessageHand
         return default;
     }
 
-    private async Task<object?> InvokeMethod(ITelegramBotClient client, UpdateType type, Message message)
+    private async Task<object?> OnMessage(ITelegramBotClient botClient, Message updateMessage, CancellationToken token)
     {
-        var method = GetMethod(type, message);
+        try
+        {
+            var method = GetMethodByPath(updateMessage);
+            var invokeMethod = await InvokeMethod(botClient, method);
 
-        if (method is { ControllerType: not null })
+            return invokeMethod;
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Error on message handler");
+        }
+
+        return default;
+    }
+
+    private async Task<object?> InvokeMethod(ITelegramBotClient client, BotCommandInfo botCommandInfo)
+    {
+        if (botCommandInfo is { ControllerType: not null })
         {
             List<object> paramList = [];
-            var methodParams = method.Method.GetParameters();
+            var methodParams = botCommandInfo.Method.GetParameters();
 
             if (methodParams.Any(x => x.ParameterType == typeof(CommandData)))
             {
@@ -54,51 +70,62 @@ public class BotMessageHandler(IServiceProvider provider, ILogger<BotMessageHand
                     new CommandData()
                     {
                         BotClient = client,
-                        Message = message,
-                        Chat = message.Chat,
-                        FromUser = message.From,
-                        Params = method.Params
+                        Update = botCommandInfo.Update,
+                        Message = botCommandInfo.Message,
+                        Chat = botCommandInfo.Message?.Chat,
+                        FromUser = botCommandInfo.Message?.From,
+                        Params = botCommandInfo.Params
                     }
                 ];
             }
 
-            var controller = (BotCommandController)ActivatorUtilities.CreateInstance(provider, method.ControllerType);
+            var controller = (BotCommandController)ActivatorUtilities.CreateInstance(provider, botCommandInfo.ControllerType);
 
-            return await MethodHelper.InvokeMethod(method.Method, paramList, controller);
+            return await MethodHelper.InvokeMethod(botCommandInfo.Method, paramList, controller);
         }
 
         return default;
     }
 
-    private BotCommandInfo? GetMethod(UpdateType type, Message message)
+    private BotCommandInfo? GetMethodByUpdate(Update update)
     {
         var commands = GetMethods();
-        var method = GetMethodByPath(commands, message);
+        var method = commands.FirstOrDefault(info => info.GetCustomAttributes<UpdateAttribute>().Any(a => a.UpdateType == update.Type));
 
-        if (method.Item1 != null)
+        if (method != null)
         {
             return new BotCommandInfo()
             {
-                ControllerType = GetCommands().Single(x => x == method.Item1.DeclaringType),
-                Method = method.Item1,
-                Params = method.Item2
+                ControllerType = GetCommands().Single(x => x == method.DeclaringType),
+                Method = method,
+                Update = update
             };
         }
 
         return default;
     }
 
-    private (MethodInfo method, string) GetMethodByPath(IEnumerable<MethodInfo> methods, Message message)
+    private BotCommandInfo? GetMethodByPath(Message message)
     {
+        var methods = GetMethods();
         var method = methods.FirstOrDefault(x =>
             x.GetCustomAttributes<CommandAttribute>().Any(a => message.Text?.Equals($"/{a.Path}") ?? false) ||
             x.GetCustomAttributes<TextCommandAttribute>().Any(a => message.Text?.Equals(a.Command) ?? false) ||
             x.GetCustomAttributes<TypedCommandAttribute>().Any(a => message.Type == a.MessageType)
         );
 
-        return method != null ?
-            (method, string.Join(" ", message.Text?.Split(" ").Skip(1) ?? Array.Empty<string>())) :
-            default;
+        if (method != null)
+        {
+            return new BotCommandInfo()
+            {
+                ControllerType = GetCommands().Single(x => x == method.DeclaringType),
+                Method = method,
+                Message = message,
+                Params = string.Join(" ", message.Text?.Split(" ").Skip(1) ?? Array.Empty<string>())
+            };
+        }
+
+        return default;
     }
 
     private IEnumerable<MethodInfo> GetMethods()

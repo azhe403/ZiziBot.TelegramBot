@@ -31,4 +31,10 @@ public class SampleCommands : BotCommandController
     {
         await data.BotClient.SendTextMessageAsync(data.Message.Chat.Id, "Halo!");
     }
+
+    [Update(UpdateType.ChatJoinRequest)]
+    public async Task ChatJoinRequestCommand(CommandData data)
+    {
+        await data.BotClient.SendTextMessageAsync(data.Update.ChatJoinRequest.Chat.Id, "Chat join request!");
+    }
 }
