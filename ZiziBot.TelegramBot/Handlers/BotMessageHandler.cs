@@ -92,11 +92,12 @@ public class BotMessageHandler(IServiceProvider provider, ILogger<BotMessageHand
     {
         var method = methods.FirstOrDefault(x =>
             x.GetCustomAttributes<CommandAttribute>().Any(a => message.Text?.Equals($"/{a.Path}") ?? false) ||
-            x.GetCustomAttributes<TextCommandAttribute>().Any(a => message.Text?.Equals(a.Command) ?? false)
+            x.GetCustomAttributes<TextCommandAttribute>().Any(a => message.Text?.Equals(a.Command) ?? false) ||
+            x.GetCustomAttributes<TypedCommandAttribute>().Any(a => message.Type == a.MessageType)
         );
 
         return method != null ?
-            (method, string.Join(" ", message.Text!.Split(" ").Skip(1))) :
+            (method, string.Join(" ", message.Text?.Split(" ").Skip(1) ?? Array.Empty<string>())) :
             default;
     }
 

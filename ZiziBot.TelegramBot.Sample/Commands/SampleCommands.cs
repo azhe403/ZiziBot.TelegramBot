@@ -1,4 +1,5 @@
 ﻿using Telegram.Bot;
+using Telegram.Bot.Types.Enums;
 using ZiziBot.TelegramBot.Attributes;
 using ZiziBot.TelegramBot.Models;
 
@@ -23,5 +24,11 @@ public class SampleCommands : BotCommandController
     public async Task MulaiCommand(CommandData data)
     {
         await data.BotClient.SendTextMessageAsync(data.Message.Chat.Id, "Mari kita mulai!");
+    }
+
+    [TypedCommand(MessageType.NewChatMembers)]
+    public async Task NewChatMembersCommand(CommandData data)
+    {
+        await data.BotClient.SendTextMessageAsync(data.Message.Chat.Id, "Halo!");
     }
 }
