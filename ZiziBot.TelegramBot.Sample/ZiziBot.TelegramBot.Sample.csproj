@@ -7,12 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.6"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.6" />
+        <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\ZiziBot.TelegramBot\ZiziBot.TelegramBot.csproj"/>
+        <ProjectReference Include="..\ZiziBot.TelegramBot\ZiziBot.TelegramBot.csproj" />
     </ItemGroup>
 
 </Project>

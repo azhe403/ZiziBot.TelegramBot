@@ -27,6 +27,12 @@ public class SampleCommands : BotCommandController
         await data.BotClient.SendTextMessageAsync(data.Chat, "Mari kita mulai!");
     }
 
+    [DefaultCommand]
+    public async Task DefaultCommand(CommandData data)
+    {
+        await data.BotClient.SendTextMessageAsync(data.Chat, "Default!");
+    }
+
     [TypedCommand(MessageType.NewChatMembers)]
     public async Task NewChatMembersCommand(CommandData data)
     {

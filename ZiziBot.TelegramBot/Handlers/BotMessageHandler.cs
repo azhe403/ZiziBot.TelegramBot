@@ -28,7 +28,7 @@ public class BotMessageHandler(IServiceProvider provider, ILogger<BotMessageHand
     {
         try
         {
-            var method = GetMethodByUpdate(update);
+            var method = GetMethod(update);
             var invokeMethod = await InvokeMethod(botClient, method);
 
             return invokeMethod;
@@ -46,7 +46,7 @@ public class BotMessageHandler(IServiceProvider provider, ILogger<BotMessageHand
         try
         {
             var message = update.Message ?? update.EditedMessage;
-            var method = GetMethodByPath(message!);
+            var method = GetMethod(message!);
             if (method == null)
             {
                 logger.LogDebug("No handler for this update: {Update}", update.Id);
@@ -95,8 +95,7 @@ public class BotMessageHandler(IServiceProvider provider, ILogger<BotMessageHand
 
         return default;
     }
-
-    private BotCommandInfo? GetMethodByUpdate(Update update)
+    private BotCommandInfo? GetMethod(Update update)
     {
         var commands = GetMethods();
         var method = commands.FirstOrDefault(info => info.GetCustomAttributes<UpdateAttribute>().Any(a => a.UpdateType == update.Type));
@@ -114,7 +113,7 @@ public class BotMessageHandler(IServiceProvider provider, ILogger<BotMessageHand
         return default;
     }
 
-    private BotCommandInfo? GetMethodByPath(Message message)
+    private BotCommandInfo? GetMethod(Message message)
     {
         var methods = GetMethods();
         var method = methods.FirstOrDefault(x =>
@@ -122,6 +121,9 @@ public class BotMessageHandler(IServiceProvider provider, ILogger<BotMessageHand
             x.GetCustomAttributes<TextCommandAttribute>().Any(a => message.Text?.Equals(a.Command) ?? false) ||
             x.GetCustomAttributes<TypedCommandAttribute>().Any(a => message.Type == a.MessageType)
         );
+
+        if (method == null)
+            method = methods.SingleOrDefault(x => x.GetCustomAttributes<DefaultCommandAttribute>().Any());
 
         if (method != null)
         {
@@ -137,9 +139,9 @@ public class BotMessageHandler(IServiceProvider provider, ILogger<BotMessageHand
         return default;
     }
 
-    private IEnumerable<MethodInfo> GetMethods()
+    private List<MethodInfo> GetMethods()
     {
-        return commandCollection.CommandTypes.SelectMany(x => x.GetMethods());
+        return commandCollection.CommandTypes.SelectMany(x => x.GetMethods()).ToList();
     }
 
     private IEnumerable<Type> GetCommands()
