@@ -95,10 +95,11 @@ public class BotMessageHandler(IServiceProvider provider, ILogger<BotMessageHand
 
         return default;
     }
+
     private BotCommandInfo? GetMethod(Update update)
     {
         var commands = GetMethods();
-        var method = commands.FirstOrDefault(info => info.GetCustomAttributes<UpdateAttribute>().Any(a => a.UpdateType == update.Type));
+        var method = commands.FirstOrDefault(info => info.GetCustomAttributes<UpdateCommandAttribute>().Any(a => a.UpdateType == update.Type));
 
         if (method != null)
         {

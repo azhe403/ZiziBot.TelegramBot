@@ -39,13 +39,13 @@ public class SampleCommands : BotCommandController
         await data.BotClient.SendTextMessageAsync(data.Chat, "Halo!");
     }
 
-    [Update(UpdateType.ChatJoinRequest)]
+    [UpdateCommand(UpdateType.ChatJoinRequest)]
     public async Task ChatJoinRequestCommand(CommandData data)
     {
         await data.BotClient.SendTextMessageAsync(data.Chat, "Chat join request!");
     }
 
-    [Update(UpdateType.InlineQuery)]
+    [UpdateCommand(UpdateType.InlineQuery)]
     public async Task InlineQueryCommand(CommandData data)
     {
         await data.BotClient.AnswerInlineQueryAsync(data.InlineQueryId, new List<InlineQueryResult>()
