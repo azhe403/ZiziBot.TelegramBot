@@ -1,6 +1,5 @@
-using System.Security.Cryptography.X509Certificates;
 using Serilog;
-using ZiziBot.TelegramBot.Extensions;
+using ZiziBot.TelegramBot.Framework.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

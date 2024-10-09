@@ -1,8 +1,8 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InlineQueryResults;
-using ZiziBot.TelegramBot.Attributes;
-using ZiziBot.TelegramBot.Models;
+using ZiziBot.TelegramBot.Framework.Attributes;
+using ZiziBot.TelegramBot.Framework.Models;
 
 namespace ZiziBot.TelegramBot.Sample.Commands;
 

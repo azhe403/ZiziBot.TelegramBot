@@ -3,3 +3,6 @@ charset = utf-8
 end_of_line = lf
 indent_style = space
 indent_size = 4
+
+# ReSharper properties
+resharper_wrap_primary_constructor_parameters_style = chop_if_long

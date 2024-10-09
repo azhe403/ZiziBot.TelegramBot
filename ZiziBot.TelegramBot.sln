@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZiziBot.TelegramBot", "ZiziBot.TelegramBot\ZiziBot.TelegramBot.csproj", "{52626DA6-7A86-4054-B25B-DE54ABDDA365}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZiziBot.TelegramBot.Framework", "ZiziBot.TelegramBot.Framework\ZiziBot.TelegramBot.Framework.csproj", "{52626DA6-7A86-4054-B25B-DE54ABDDA365}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZiziBot.TelegramBot.Sample", "ZiziBot.TelegramBot.Sample\ZiziBot.TelegramBot.Sample.csproj", "{CC104D8E-07DC-4C0B-B723-6A2AB3ACEE22}"
 EndProject
