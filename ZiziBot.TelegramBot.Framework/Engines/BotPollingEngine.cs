@@ -5,11 +5,13 @@ using Telegram.Bot.Types;
 using ZiziBot.TelegramBot.Framework.Handlers;
 using ZiziBot.TelegramBot.Framework.Interfaces;
 using ZiziBot.TelegramBot.Framework.Models;
+using ZiziBot.TelegramBot.Framework.Models.Configs;
 
 namespace ZiziBot.TelegramBot.Framework.Engines;
 
 public class BotPollingEngine(
     ILogger<BotPollingEngine> logger,
+    List<BotTokenConfig> botTokenConfigs,
     BotClientCollection botClientCollection,
     BotMessageHandler botMessageHandler
 ) : IBotEngine
@@ -35,8 +37,10 @@ public class BotPollingEngine(
         }
     }
 
-    public async Task Start(IEnumerable<BotClientItem> clients)
+    public async Task Start()
     {
+        var clients = botTokenConfigs.Select(x => BotClientItem.Create(x.Name, new TelegramBotClientOptions(x.Token)));
+
         foreach (var client in clients)
         {
             await Start(client);

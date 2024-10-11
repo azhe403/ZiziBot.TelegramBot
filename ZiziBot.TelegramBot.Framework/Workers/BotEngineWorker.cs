@@ -13,20 +13,18 @@ public class BotEngineWorker(
     IBotEngine botEngine
 ) : BackgroundService
 {
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
             var clients = botConfigurations.Select(x => BotClientItem.Create(x.Name, new TelegramBotClientOptions(x.Token)));
-            botEngine.Start(clients);
+            await botEngine.Start();
         }
         catch (Exception exception)
         {
             logger.LogError(exception, "Error starting Bot");
             throw;
         }
-
-        return Task.CompletedTask;
     }
 
     public override Task StopAsync(CancellationToken cancellationToken)

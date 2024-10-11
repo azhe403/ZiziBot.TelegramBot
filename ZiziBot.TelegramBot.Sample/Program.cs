@@ -12,7 +12,7 @@ builder.Services.AddZiziBotTelegramBot();
 var app = builder.Build();
 
 app.UseHttpsRedirection();
-app.UseZiziBotTelegramBot();
+await app.UseZiziBotTelegramBot();
 
 app.MapGet("/", () => "OK!");
 

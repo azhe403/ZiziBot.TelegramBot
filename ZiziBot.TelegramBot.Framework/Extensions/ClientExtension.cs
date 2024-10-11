@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using ZiziBot.TelegramBot.Framework.Engines;
 using ZiziBot.TelegramBot.Framework.Handlers;
@@ -76,31 +77,38 @@ public static class ClientExtension
                     break;
                 }
             }
-
-            services.AddHostedService<BotEngineWorker>();
         }
 
-        services.AddSingleton<BotMessageHandler>();
-        services.AddSingleton<BotClientCollection>();
+        services.AddScoped<BotMessageHandler>();
+        services.AddScoped<BotClientCollection>();
 
         return services;
     }
 
     private static IServiceCollection EnablePollingEngine(this IServiceCollection services)
     {
-        services.AddSingleton<IBotEngine, BotPollingEngine>();
+        services.AddScoped<IBotEngine, BotPollingEngine>();
 
         return services;
     }
 
     private static IServiceCollection EnableWebhookEngine(this IServiceCollection services)
     {
-        services.AddSingleton<IBotEngine, BotWebhookEngine>();
+        services.AddScoped<IBotEngine, BotWebhookEngine>();
 
         return services;
     }
 
-    public static IApplicationBuilder UseZiziBotTelegramBot(this WebApplication app)
+    public async static Task<IApplicationBuilder> UseZiziBotTelegramBot(this WebApplication app)
+    {
+        app.StartWebhookModeInternal();
+
+        _ = await app.StartPollingModeInternal();
+
+        return app;
+    }
+
+    static void StartWebhookModeInternal(this WebApplication app)
     {
         app.MapPost(ValueConst.WebHookPath + "/{botId}", async (
             HttpContext context,
@@ -117,6 +125,14 @@ public static class ClientExtension
             await botMessageHandler.Handle(client.Client, update, default);
             await context.Response.WriteAsync("OK");
         });
+    }
+
+    async static Task<IApplicationBuilder> StartPollingModeInternal(this IApplicationBuilder app)
+    {
+        var scope = app.ApplicationServices.CreateScope();
+        var botEngine = scope.ServiceProvider.GetRequiredService<IBotEngine>();
+
+        await botEngine.Start();
 
         return app;
     }

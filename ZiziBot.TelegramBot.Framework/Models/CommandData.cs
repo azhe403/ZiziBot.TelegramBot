@@ -5,8 +5,11 @@ namespace ZiziBot.TelegramBot.Framework.Models;
 
 public class CommandData
 {
+    public required string BotToken { get; set; }
     public required ITelegramBotClient BotClient { get; set; }
     public required Update Update { get; set; }
+
+    public CallbackQuery CallbackQuery { get; set; }
 
     public InlineQuery? InlineQuery => Update.InlineQuery;
     public string InlineQueryId => InlineQuery?.Id ?? string.Empty;

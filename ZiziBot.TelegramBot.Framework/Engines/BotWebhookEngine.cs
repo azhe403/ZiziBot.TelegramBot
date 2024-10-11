@@ -10,6 +10,7 @@ namespace ZiziBot.TelegramBot.Framework.Engines;
 
 public class BotWebhookEngine(
     ILogger<BotWebhookEngine> logger,
+    List<BotTokenConfig> botTokenConfigs,
     BotClientCollection botClientCollection,
     BotEngineConfig botEngineConfig,
     BotMessageHandler botMessageHandler
@@ -39,8 +40,10 @@ public class BotWebhookEngine(
         }
     }
 
-    public async Task Start(IEnumerable<BotClientItem> clients)
+    public async Task Start()
     {
+        var clients = botTokenConfigs.Select(x => BotClientItem.Create(x.Name, new TelegramBotClientOptions(x.Token)));
+
         foreach (var client in clients)
         {
             await Start(client);

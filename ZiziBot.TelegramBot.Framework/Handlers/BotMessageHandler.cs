@@ -13,7 +13,8 @@ namespace ZiziBot.TelegramBot.Framework.Handlers;
 public class BotMessageHandler(
     IServiceProvider provider,
     ILogger<BotMessageHandler> logger,
-    BotCommandCollection commandCollection
+    BotCommandCollection commandCollection,
+    BotClientCollection botClientCollection
 )
 {
     public async Task<object?> Handle(ITelegramBotClient botClient, Update update, CancellationToken token)
@@ -81,8 +82,9 @@ public class BotMessageHandler(
             {
                 paramList = [
                     new CommandData() {
+                        BotToken = botClientCollection.Items.First(x => x.Client == client).BotToken,
                         BotClient = client,
-                        Update = botCommandInfo.Update,
+                        Update = botCommandInfo.Update!,
                         Message = botCommandInfo.Message,
                         Params = botCommandInfo.Params
                     }
