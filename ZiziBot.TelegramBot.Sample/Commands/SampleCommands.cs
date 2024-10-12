@@ -1,6 +1,5 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.InlineQueryResults;
 using ZiziBot.TelegramBot.Framework.Attributes;
 using ZiziBot.TelegramBot.Framework.Models;
 
@@ -43,14 +42,5 @@ public class SampleCommands : BotCommandController
     public async Task ChatJoinRequestCommand(CommandData data)
     {
         await data.BotClient.SendTextMessageAsync(data.Chat, "Chat join request!");
-    }
-
-    [UpdateCommand(UpdateType.InlineQuery)]
-    public async Task InlineQueryCommand(CommandData data)
-    {
-        await data.BotClient.AnswerInlineQueryAsync(data.InlineQueryId, new List<InlineQueryResult>()
-        {
-            new InlineQueryResultArticle("aa576dec-0727-4ea1-99ae-3c7cb20ea3c8", "Sample Inline", new InputTextMessageContent("Inline Content"))
-        });
     }
 }

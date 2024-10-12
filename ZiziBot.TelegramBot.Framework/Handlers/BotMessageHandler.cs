@@ -20,7 +20,7 @@ public class BotMessageHandler(
     IEnumerable<Type> BotCommands => GetCommands();
     List<MethodInfo> BotMethods => GetMethods();
 
-    #region Invoker
+    #region Invocation
     public async Task<object?> Handle(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
         var result = update.Type switch {
@@ -41,11 +41,9 @@ public class BotMessageHandler(
                 _ => GetMethod(update)
             };
 
-
             if (method == null)
             {
-                logger.LogDebug("No handler for InlineQuery: {Update}", update.Id);
-
+                logger.LogWarning("No handler for {UpdateType} in UpdateId: {UpdateId}", update.Type, update.Id);
                 return default;
             }
 
@@ -68,9 +66,10 @@ public class BotMessageHandler(
         {
             var message = update.Message ?? update.EditedMessage;
             var method = GetMethod(message!);
+
             if (method == null)
             {
-                logger.LogDebug("No handler for this update: {Update}", update.Id);
+                logger.LogWarning("No handler for MessageId: {MessageId} in UpdateId: {UpdateId}", message?.MessageId, update.Id);
                 return default;
             }
 
@@ -103,19 +102,21 @@ public class BotMessageHandler(
                     BotToken = botClientCollection.Items.First(x => x.Client == client).BotToken,
                     BotClient = client,
                     Update = botCommandInfo.Update!,
-                    Message = botCommandInfo.Message,
-                    Params = botCommandInfo.Params
+                    CommandParam = botCommandInfo.Params
                 }
             ];
         }
 
         var controller = (BotCommandController)ActivatorUtilities.CreateInstance(provider, botCommandInfo.ControllerType);
 
-        return await MethodHelper.InvokeMethod(botCommandInfo.Method, paramList, controller);
+        var invokeResult = await MethodHelper.InvokeMethod(botCommandInfo.Method, paramList, controller);
+        logger.LogDebug("Successfully handled UpdateId: {UpdateId} for {UpdateType} ", botCommandInfo.Update!.Id, botCommandInfo.Update!.Type);
+
+        return invokeResult;
     }
     #endregion
 
-    #region Get Method
+    #region Command
     BotCommandInfo? GetMethod(Update update)
     {
         var method = BotMethods.FirstOrDefault(info => info.GetCustomAttributes<UpdateCommandAttribute>().Any(a => a.UpdateType == update.Type));
