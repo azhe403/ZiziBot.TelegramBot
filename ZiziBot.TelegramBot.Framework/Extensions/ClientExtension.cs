@@ -131,7 +131,6 @@ public static class ClientExtension
         var botEngine = scope.ServiceProvider.GetRequiredService<IBotEngine>();
 
         await botEngine.Start();
-        scope.Dispose();
 
         return app;
     }
