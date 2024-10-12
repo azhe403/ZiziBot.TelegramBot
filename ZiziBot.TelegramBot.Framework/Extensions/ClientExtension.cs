@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Telegram.Bot;
 using Telegram.Bot.Types;
 using ZiziBot.TelegramBot.Framework.Engines;
 using ZiziBot.TelegramBot.Framework.Handlers;
@@ -14,7 +13,6 @@ using ZiziBot.TelegramBot.Framework.Models;
 using ZiziBot.TelegramBot.Framework.Models.Configs;
 using ZiziBot.TelegramBot.Framework.Models.Constants;
 using ZiziBot.TelegramBot.Framework.Models.Enums;
-using ZiziBot.TelegramBot.Framework.Workers;
 
 namespace ZiziBot.TelegramBot.Framework.Extensions;
 
@@ -103,7 +101,7 @@ public static class ClientExtension
     {
         app.StartWebhookModeInternal();
 
-        _ = await app.StartPollingModeInternal();
+        _ = await app.StartTelegramBot();
 
         return app;
     }
@@ -127,12 +125,13 @@ public static class ClientExtension
         });
     }
 
-    async static Task<IApplicationBuilder> StartPollingModeInternal(this IApplicationBuilder app)
+    async static Task<IApplicationBuilder> StartTelegramBot(this IApplicationBuilder app)
     {
         var scope = app.ApplicationServices.CreateScope();
         var botEngine = scope.ServiceProvider.GetRequiredService<IBotEngine>();
 
         await botEngine.Start();
+        scope.Dispose();
 
         return app;
     }

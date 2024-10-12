@@ -22,6 +22,10 @@ public class CommandData
     #region InlineQuery
     public InlineQuery? InlineQuery => Update.InlineQuery;
     public string InlineQueryId => InlineQuery?.Id ?? string.Empty;
+    public string InlineQueryQuery => InlineQuery?.Query ?? string.Empty;
+    public string InlineQueryQueryCmd => InlineQueryQuery.Split(" ").FirstOrDefault() ?? string.Empty;
+    public string InlineQueryQueryParam => string.Join(" ", InlineQueryQuery.Split(" ").Skip(1));
+    public string InlineQueryOffset => InlineQuery?.Offset ?? string.Empty;
     #endregion
 
     #region Chat
