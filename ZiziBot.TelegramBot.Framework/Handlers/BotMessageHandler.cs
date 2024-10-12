@@ -17,6 +17,10 @@ public class BotMessageHandler(
     BotClientCollection botClientCollection
 )
 {
+    IEnumerable<Type> BotCommands => GetCommands();
+    List<MethodInfo> BotMethods => GetMethods();
+
+    #region Invoker
     public async Task<object?> Handle(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
         var result = update.Type switch {
@@ -28,11 +32,24 @@ public class BotMessageHandler(
         return result;
     }
 
-    private async Task<object?> OnUpdate(ITelegramBotClient botClient, Update update, CancellationToken token)
+    async Task<object?> OnUpdate(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
         try
         {
-            var method = GetMethod(update);
+            var method = update.Type switch {
+                UpdateType.InlineQuery => GetMethod(update.InlineQuery!),
+                _ => GetMethod(update)
+            };
+
+
+            if (method == null)
+            {
+                logger.LogDebug("No handler for InlineQuery: {Update}", update.Id);
+
+                return default;
+            }
+
+            method.Update = update;
             var invokeMethod = await InvokeMethod(botClient, method);
 
             return invokeMethod;
@@ -45,7 +62,7 @@ public class BotMessageHandler(
         return default;
     }
 
-    private async Task<object?> OnMessage(ITelegramBotClient botClient, Update update, CancellationToken token)
+    async Task<object?> OnMessage(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
         try
         {
@@ -71,43 +88,42 @@ public class BotMessageHandler(
         return default;
     }
 
-    private async Task<object?> InvokeMethod(ITelegramBotClient client, BotCommandInfo botCommandInfo)
+    async Task<object?> InvokeMethod(ITelegramBotClient client, BotCommandInfo? botCommandInfo)
     {
-        if (botCommandInfo is { ControllerType: not null })
+        if (botCommandInfo is null)
+            return default;
+
+        List<object> paramList = [];
+        var methodParams = botCommandInfo.Method.GetParameters();
+
+        if (methodParams.Any(x => x.ParameterType == typeof(CommandData)))
         {
-            List<object> paramList = [];
-            var methodParams = botCommandInfo.Method.GetParameters();
-
-            if (methodParams.Any(x => x.ParameterType == typeof(CommandData)))
-            {
-                paramList = [
-                    new CommandData() {
-                        BotToken = botClientCollection.Items.First(x => x.Client == client).BotToken,
-                        BotClient = client,
-                        Update = botCommandInfo.Update!,
-                        Message = botCommandInfo.Message,
-                        Params = botCommandInfo.Params
-                    }
-                ];
-            }
-
-            var controller = (BotCommandController)ActivatorUtilities.CreateInstance(provider, botCommandInfo.ControllerType);
-
-            return await MethodHelper.InvokeMethod(botCommandInfo.Method, paramList, controller);
+            paramList = [
+                new CommandData() {
+                    BotToken = botClientCollection.Items.First(x => x.Client == client).BotToken,
+                    BotClient = client,
+                    Update = botCommandInfo.Update!,
+                    Message = botCommandInfo.Message,
+                    Params = botCommandInfo.Params
+                }
+            ];
         }
 
-        return default;
-    }
+        var controller = (BotCommandController)ActivatorUtilities.CreateInstance(provider, botCommandInfo.ControllerType);
 
-    private BotCommandInfo? GetMethod(Update update)
+        return await MethodHelper.InvokeMethod(botCommandInfo.Method, paramList, controller);
+    }
+    #endregion
+
+    #region Get Method
+    BotCommandInfo? GetMethod(Update update)
     {
-        var commands = GetMethods();
-        var method = commands.FirstOrDefault(info => info.GetCustomAttributes<UpdateCommandAttribute>().Any(a => a.UpdateType == update.Type));
+        var method = BotMethods.FirstOrDefault(info => info.GetCustomAttributes<UpdateCommandAttribute>().Any(a => a.UpdateType == update.Type));
 
         if (method != null)
         {
             return new BotCommandInfo() {
-                ControllerType = GetCommands().Single(x => x == method.DeclaringType),
+                ControllerType = BotCommands.Single(x => x == method.DeclaringType),
                 Method = method,
                 Update = update
             };
@@ -116,22 +132,44 @@ public class BotMessageHandler(
         return default;
     }
 
-    private BotCommandInfo? GetMethod(Message message)
+    BotCommandInfo? GetMethod(InlineQuery inlineQuery)
     {
-        var methods = GetMethods();
-        var method = methods.FirstOrDefault(x =>
+        var inlineQueryCommands = inlineQuery.Query.Split(" ");
+        var inlineQueryCommand = inlineQueryCommands.FirstOrDefault();
+        var method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<InlineQueryAttribute>().Any(attribute => attribute.Command == inlineQueryCommand));
+
+        if (method == null)
+        {
+            logger.LogDebug("Fallback to default InlineQuery for InlineQueryId: {InlineQueryId}", inlineQuery.Id);
+            method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<InlineQueryAttribute>().Any());
+        }
+
+        if (method != null)
+        {
+            return new BotCommandInfo() {
+                ControllerType = BotCommands.Single(x => x == method.DeclaringType),
+                Method = method,
+            };
+        }
+
+        return default;
+    }
+
+    BotCommandInfo? GetMethod(Message message)
+    {
+        var method = BotMethods.FirstOrDefault(x =>
             x.GetCustomAttributes<CommandAttribute>().Any(a => message.Text?.Equals($"/{a.Path}") ?? false) ||
             x.GetCustomAttributes<TextCommandAttribute>().Any(a => message.Text?.Equals(a.Command) ?? false) ||
             x.GetCustomAttributes<TypedCommandAttribute>().Any(a => message.Type == a.MessageType)
         );
 
         if (method == null)
-            method = methods.SingleOrDefault(x => x.GetCustomAttributes<DefaultCommandAttribute>().Any());
+            method = BotMethods.SingleOrDefault(x => x.GetCustomAttributes<DefaultCommandAttribute>().Any());
 
         if (method != null)
         {
             return new BotCommandInfo() {
-                ControllerType = GetCommands().Single(x => x == method.DeclaringType),
+                ControllerType = BotCommands.Single(x => x == method.DeclaringType),
                 Method = method,
                 Message = message,
                 Params = string.Join(" ", message.Text?.Split(" ").Skip(1) ?? Array.Empty<string>())
@@ -140,14 +178,17 @@ public class BotMessageHandler(
 
         return default;
     }
+    #endregion
 
-    private List<MethodInfo> GetMethods()
+    #region Reflection
+    List<MethodInfo> GetMethods()
     {
         return commandCollection.CommandTypes.SelectMany(x => x.GetMethods()).ToList();
     }
 
-    private IEnumerable<Type> GetCommands()
+    IEnumerable<Type> GetCommands()
     {
         return commandCollection.CommandTypes;
     }
+    #endregion
 }
