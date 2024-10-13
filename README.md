@@ -6,6 +6,10 @@ This is a very early stage project, so nothing guarantee for breaking changes in
 
 This project is inspired by [VodemSharp/Allowed.Telegram.Bot](https://github.com/VodemSharp/Allowed.Telegram.Bot)
 
+# Demo project
+
+1. [ZiziBot-Engine](https://github.com/azhe403/ZiziBot-Engine)
+
 # Thanks
 
 Thanks to **Jetbrains** for dotUltimate license.

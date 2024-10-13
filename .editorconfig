@@ -5,4 +5,7 @@ indent_style = space
 indent_size = 4
 
 # ReSharper properties
+resharper_csharp_wrap_after_declaration_lpar = true
+resharper_csharp_wrap_before_declaration_rpar = true
+resharper_csharp_wrap_parameters_style = chop_if_long
 resharper_wrap_primary_constructor_parameters_style = chop_if_long
