@@ -158,11 +158,13 @@ public class BotMessageHandler(
 
     BotCommandInfo? GetMethod(Message message)
     {
-        var method = BotMethods.FirstOrDefault(x =>
-            x.GetCustomAttributes<CommandAttribute>().Any(a => message.Text?.Equals($"/{a.Path}") ?? false) ||
-            x.GetCustomAttributes<TextCommandAttribute>().Any(a => message.Text?.Equals(a.Command) ?? false) ||
-            x.GetCustomAttributes<TypedCommandAttribute>().Any(a => message.Type == a.MessageType)
-        );
+        var method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<CommandAttribute>().Any(a => message.Text?.Split(" ").FirstOrDefault()?.Equals($"/{a.Path}") ?? false));
+
+        if (method == null)
+            method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<TextCommandAttribute>().Any(a => message.Text?.Equals(a.Command) ?? false));
+
+        if (method == null)
+            method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<TypedCommandAttribute>().Any(a => message.Type == a.MessageType));
 
         if (method == null)
             method = BotMethods.SingleOrDefault(x => x.GetCustomAttributes<DefaultCommandAttribute>().Any());

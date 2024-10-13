@@ -20,6 +20,12 @@ public class SampleCommands : BotCommandController
         await data.BotClient.SendTextMessageAsync(data.Chat, "Let's start!");
     }
 
+    [Command("say")]
+    public async Task SayCommand(CommandData data)
+    {
+        await data.BotClient.SendTextMessageAsync(data.Chat, $"You say: {data.CommandParam}!");
+    }
+
     [TextCommand("mulai")]
     public async Task MulaiCommand(CommandData data)
     {
