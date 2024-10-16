@@ -1,14 +1,16 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using ZiziBot.TelegramBot.Framework.Models.Configs;
 
 namespace ZiziBot.TelegramBot.Framework.Models;
 
-public class CommandData
+public partial class CommandData
 {
     public required string BotToken { get; init; }
     public required ITelegramBotClient BotClient { get; init; }
     public required Update Update { get; init; }
+    public required BotEngineConfig EngineConfig { get; set; }
 
     #region Join Request
     public ChatJoinRequest? ChatJoinRequest => Update.ChatJoinRequest;
@@ -66,7 +68,7 @@ public class CommandData
     #region Message
     public Message? ReplyToMessage => Message?.ReplyToMessage?.Type is not (MessageType.ForumTopicCreated or MessageType.ForumTopicEdited) ? Message?.ReplyToMessage : default;
     public Message? Message => Update.Message ?? Update.EditedMessage ?? CallbackQuery?.Message;
-    public string MessageId => Message?.MessageId.ToString() ?? string.Empty;
+    public int MessageId => Message?.MessageId ?? default;
     public string MessageText => Message?.Text ?? string.Empty;
     public string[] MessageTexts => MessageText.Split(" ");
     #endregion

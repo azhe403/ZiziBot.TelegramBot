@@ -7,6 +7,7 @@ using Telegram.Bot.Types.Enums;
 using ZiziBot.TelegramBot.Framework.Attributes;
 using ZiziBot.TelegramBot.Framework.Helpers;
 using ZiziBot.TelegramBot.Framework.Models;
+using ZiziBot.TelegramBot.Framework.Models.Configs;
 
 namespace ZiziBot.TelegramBot.Framework.Handlers;
 
@@ -14,7 +15,8 @@ public class BotMessageHandler(
     IServiceProvider provider,
     ILogger<BotMessageHandler> logger,
     BotCommandCollection commandCollection,
-    BotClientCollection botClientCollection
+    BotClientCollection botClientCollection,
+    BotEngineConfig botEngineConfig
 )
 {
     IEnumerable<Type> BotCommands => GetCommands();
@@ -101,6 +103,7 @@ public class BotMessageHandler(
                 new CommandData() {
                     BotToken = botClientCollection.Items.First(x => x.Client == client).BotToken,
                     BotClient = client,
+                    EngineConfig = botEngineConfig,
                     Update = botCommandInfo.Update!,
                     CommandParam = botCommandInfo.Params
                 }

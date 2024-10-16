@@ -8,6 +8,7 @@ public class BotEngineConfig
 
     public string? WebhookUrl { get; set; }
     public BotEngineMode EngineMode { get; set; }
+    public ReplyStrategy ReplyStrategy { get; set; }
 
     public List<BotTokenConfig> Bot { get; set; }
 }

@@ -1,5 +1,4 @@
-﻿using Telegram.Bot;
-using Telegram.Bot.Types.Enums;
+﻿using Telegram.Bot.Types.Enums;
 using ZiziBot.TelegramBot.Framework.Attributes;
 using ZiziBot.TelegramBot.Framework.Models;
 
@@ -11,42 +10,24 @@ public class SampleCommands : BotCommandController
     [TextCommand("ping")]
     public async Task PingCommand(CommandData data)
     {
-        await data.BotClient.SendTextMessageAsync(data.Chat, "Pong!");
+        await data.SendMessageText("Pong!");
     }
 
     [Command("start")]
     public async Task StartCommand(CommandData data)
     {
-        await data.BotClient.SendTextMessageAsync(data.Chat, "Let's start!");
+        await data.SendMessageText("Let's start!");
     }
 
     [Command("say")]
     public async Task SayCommand(CommandData data)
     {
-        await data.BotClient.SendTextMessageAsync(data.Chat, $"You say: {data.CommandParam}!");
-    }
-
-    [TextCommand("mulai")]
-    public async Task MulaiCommand(CommandData data)
-    {
-        await data.BotClient.SendTextMessageAsync(data.Chat, "Mari kita mulai!");
+        await data.SendMessageText($"You say: {data.CommandParam}!");
     }
 
     [DefaultCommand]
     public async Task DefaultCommand(CommandData data)
     {
-        await data.BotClient.SendTextMessageAsync(data.Chat, "Default!");
-    }
-
-    [TypedCommand(MessageType.NewChatMembers)]
-    public async Task NewChatMembersCommand(CommandData data)
-    {
-        await data.BotClient.SendTextMessageAsync(data.Chat, "Halo!");
-    }
-
-    [UpdateCommand(UpdateType.ChatJoinRequest)]
-    public async Task ChatJoinRequestCommand(CommandData data)
-    {
-        await data.BotClient.SendTextMessageAsync(data.Chat, "Chat join request!");
+        await data.SendMessageText("Default!");
     }
 }
