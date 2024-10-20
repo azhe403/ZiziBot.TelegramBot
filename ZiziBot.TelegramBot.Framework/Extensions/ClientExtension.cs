@@ -30,6 +30,16 @@ public static class ClientExtension
             return botCommandCollection;
         });
 
+        services.Scan(selector => selector.FromAssemblies(AppDomain.CurrentDomain.GetAssemblies())
+            .AddClasses(filter => filter.AssignableTo<IBeforeCommand>())
+            .As<IBeforeCommand>()
+            .WithTransientLifetime());
+
+        services.Scan(selector => selector.FromAssemblies(AppDomain.CurrentDomain.GetAssemblies())
+            .AddClasses(filter => filter.AssignableTo<IAfterCommand>())
+            .As<IAfterCommand>()
+            .WithTransientLifetime());
+
         using (var provider = services.BuildServiceProvider())
         {
             var hostingEnvironment = provider.GetRequiredService<IWebHostEnvironment>();

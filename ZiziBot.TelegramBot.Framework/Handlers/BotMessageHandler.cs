@@ -6,6 +6,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using ZiziBot.TelegramBot.Framework.Attributes;
 using ZiziBot.TelegramBot.Framework.Helpers;
+using ZiziBot.TelegramBot.Framework.Interfaces;
 using ZiziBot.TelegramBot.Framework.Models;
 using ZiziBot.TelegramBot.Framework.Models.Configs;
 
@@ -97,23 +98,65 @@ public class BotMessageHandler(
         List<object> paramList = [];
         var methodParams = botCommandInfo.Method.GetParameters();
 
+        var commandData = new CommandData() {
+            BotToken = botClientCollection.Items.First(x => x.Client == client).BotToken,
+            BotClient = client,
+            EngineConfig = botEngineConfig,
+            Update = botCommandInfo.Update!,
+            CommandParam = botCommandInfo.Params
+        };
+
         if (methodParams.Any(x => x.ParameterType == typeof(CommandData)))
         {
             paramList = [
-                new CommandData() {
-                    BotToken = botClientCollection.Items.First(x => x.Client == client).BotToken,
-                    BotClient = client,
-                    EngineConfig = botEngineConfig,
-                    Update = botCommandInfo.Update!,
-                    CommandParam = botCommandInfo.Params
-                }
+                commandData
             ];
         }
 
+        #region Before Command Middleware
+        var beforeCommands = provider.GetServices<IBeforeCommand>()
+            .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
+            .ToList();
+
+        var passedMiddlewareCount = 0;
+        foreach (var command in beforeCommands)
+        {
+            logger.LogDebug("BeforeMiddleware - Invoking: {Middleware}", command.GetType().Name);
+            await command.ExecuteAsync(commandData, data => {
+                passedMiddlewareCount += 1;
+                return Task.CompletedTask;
+            });
+
+            logger.LogDebug("BeforeMiddleware - Complete: {Middleware}", command.GetType().Name);
+        }
+
+        if (beforeCommands.Count != passedMiddlewareCount)
+        {
+            logger.LogDebug("Handler stop because middleware not passed");
+
+            return default;
+        }
+        #endregion
+
+        #region Invoke Command
         var controller = (BotCommandController)ActivatorUtilities.CreateInstance(provider, botCommandInfo.ControllerType);
 
         var invokeResult = await MethodHelper.InvokeMethod(botCommandInfo.Method, paramList, controller);
         logger.LogDebug("Successfully handled UpdateId: {UpdateId} for {UpdateType} ", botCommandInfo.Update!.Id, botCommandInfo.Update!.Type);
+        #endregion
+
+        #region After Command Middleware
+        var afterCommands = provider.GetServices<IAfterCommand>()
+            .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
+            .ToList();
+
+        foreach (var command in afterCommands)
+        {
+            logger.LogDebug("AfterMiddleware - Invoking: {Middleware}", command.GetType().Name);
+            await command.ExecuteAsync(commandData);
+            logger.LogDebug("AfterMiddleware - Complete: {Middleware}", command.GetType().Name);
+        }
+        #endregion
 
         return invokeResult;
     }
