@@ -107,7 +107,7 @@ public static class ClientExtension
         return services;
     }
 
-    public async static Task<IApplicationBuilder> UseZiziBotTelegramBot(this WebApplication app)
+    public async static Task<IApplicationBuilder> UseZiziBotTelegramBot(this IApplicationBuilder app)
     {
         app.StartWebhookModeInternal();
 
@@ -116,23 +116,26 @@ public static class ClientExtension
         return app;
     }
 
-    static void StartWebhookModeInternal(this WebApplication app)
+    static void StartWebhookModeInternal(this IApplicationBuilder app)
     {
-        app.MapPost(ValueConst.WebHookPath + "/{botId}", async (
-            HttpContext context,
-            ILogger<BotWebhookEngine> logger,
-            BotMessageHandler botMessageHandler,
-            BotClientCollection botClientCollection,
-            string botId,
-            Update update
-        ) => {
-            var client = botClientCollection.Items.First(x => x.Client.BotId.ToString() == botId);
+        if (app is WebApplication webApplication)
+        {
+            webApplication.MapPost(ValueConst.WebHookPath + "/{botId}", async (
+                HttpContext context,
+                ILogger<BotWebhookEngine> logger,
+                BotMessageHandler botMessageHandler,
+                BotClientCollection botClientCollection,
+                string botId,
+                Update update
+            ) => {
+                var client = botClientCollection.Items.First(x => x.Client.BotId.ToString() == botId);
 
-            logger.LogDebug("Receiving update webhook engine. UpdateId: {UpdateId}", update.Id);
+                logger.LogDebug("Receiving update webhook engine. UpdateId: {UpdateId}", update.Id);
 
-            await botMessageHandler.Handle(client.Client, update, default);
-            await context.Response.WriteAsync("OK");
-        });
+                await botMessageHandler.Handle(client.Client, update, default);
+                await context.Response.WriteAsync("OK");
+            });
+        }
     }
 
     async static Task<IApplicationBuilder> StartTelegramBot(this IApplicationBuilder app)
