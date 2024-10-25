@@ -116,6 +116,7 @@ public class BotMessageHandler(
         #region Before Command Middleware
         var beforeCommands = provider.GetServices<IBeforeCommand>()
             .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
+            .Where(x => botEngineConfig.DisabledMiddleware?.Contains(x.GetType().Name) == false)
             .ToList();
 
         var passedMiddlewareCount = 0;
