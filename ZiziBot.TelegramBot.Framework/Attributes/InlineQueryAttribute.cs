@@ -2,7 +2,7 @@
 
 namespace ZiziBot.TelegramBot.Framework.Attributes;
 
-[AttributeUsage(AttributeTargets.Method)]
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
 [MeansImplicitUse]
 public class InlineQueryAttribute(string? command = default) : Attribute
 {
