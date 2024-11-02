@@ -10,7 +10,7 @@ public static class MethodHelper
         return method.GetCustomAttribute(typeof(AsyncStateMachineAttribute)) != null;
     }
 
-    public static async Task<object?> InvokeMethod(MethodInfo method, List<object> parameters, object instance)
+    public async static Task<object?> InvokeMethod(MethodInfo method, List<object> parameters, object instance)
     {
         if (IsAsyncMethod(method))
         {

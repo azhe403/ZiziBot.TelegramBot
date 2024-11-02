@@ -12,16 +12,16 @@ using ZiziBot.TelegramBot.Framework.Models.Configs;
 
 namespace ZiziBot.TelegramBot.Framework.Handlers;
 
-public class BotMessageHandler(
+public class BotUpdateHandler(
     IServiceProvider provider,
-    ILogger<BotMessageHandler> logger,
+    ILogger<BotUpdateHandler> logger,
     BotCommandCollection commandCollection,
     BotClientCollection botClientCollection,
     BotEngineConfig botEngineConfig
 )
 {
-    IEnumerable<Type> BotCommands => GetCommands();
-    List<MethodInfo> BotMethods => GetMethods();
+    private IEnumerable<Type> BotCommands => GetCommands();
+    private List<MethodInfo> BotMethods => GetMethods();
 
     #region Invocation
     public async Task<object?> Handle(ITelegramBotClient botClient, Update update, CancellationToken token)
@@ -35,7 +35,7 @@ public class BotMessageHandler(
         return result;
     }
 
-    async Task<object?> OnUpdate(ITelegramBotClient botClient, Update update, CancellationToken token)
+    private async Task<object?> OnUpdate(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
         try
         {
@@ -63,7 +63,7 @@ public class BotMessageHandler(
         return default;
     }
 
-    async Task<object?> OnMessage(ITelegramBotClient botClient, Update update, CancellationToken token)
+    private async Task<object?> OnMessage(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
         try
         {
@@ -90,7 +90,7 @@ public class BotMessageHandler(
         return default;
     }
 
-    async Task<object?> InvokeMethod(ITelegramBotClient client, BotCommandInfo? botCommandInfo)
+    private async Task<object?> InvokeMethod(ITelegramBotClient client, BotCommandInfo? botCommandInfo)
     {
         if (botCommandInfo is null)
             return default;
@@ -164,7 +164,7 @@ public class BotMessageHandler(
     #endregion
 
     #region Command
-    BotCommandInfo? GetMethod(Update update)
+    private BotCommandInfo? GetMethod(Update update)
     {
         var method = BotMethods.FirstOrDefault(info => info.GetCustomAttributes<UpdateCommandAttribute>().Any(a => a.UpdateType == update.Type));
 
@@ -180,7 +180,7 @@ public class BotMessageHandler(
         return default;
     }
 
-    BotCommandInfo? GetMethod(InlineQuery inlineQuery)
+    private BotCommandInfo? GetMethod(InlineQuery inlineQuery)
     {
         var inlineQueryCommands = inlineQuery.Query.Split(" ");
         var inlineQueryCommand = inlineQueryCommands.FirstOrDefault();
@@ -203,15 +203,15 @@ public class BotMessageHandler(
         return default;
     }
 
-    BotCommandInfo? GetMethod(Message message)
+    private BotCommandInfo? GetMethod(Message message)
     {
-        var method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<CommandAttribute>().Any(a => message.Text?.Split(" ").FirstOrDefault()?.Equals($"/{a.Path}") ?? false));
+        var method = BotMethods.Find(x => x.GetCustomAttributes<CommandAttribute>().Any(a => message.Text?.Split(" ").FirstOrDefault()?.Equals($"/{a.Path}") ?? false));
 
         if (method == null)
-            method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<TextCommandAttribute>().Any(a => message.Text?.Equals(a.Command) ?? false));
+            method = BotMethods.Find(x => x.GetCustomAttributes<TextCommandAttribute>().Any(a => message.Text?.Equals(a.Command) ?? false));
 
         if (method == null)
-            method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<TypedCommandAttribute>().Any(a => message.Type == a.MessageType));
+            method = BotMethods.Find(x => x.GetCustomAttributes<TypedCommandAttribute>().Any(a => message.Type == a.MessageType));
 
         if (method == null)
             method = BotMethods.SingleOrDefault(x => x.GetCustomAttributes<DefaultCommandAttribute>().Any());
@@ -231,12 +231,12 @@ public class BotMessageHandler(
     #endregion
 
     #region Reflection
-    List<MethodInfo> GetMethods()
+    private List<MethodInfo> GetMethods()
     {
         return commandCollection.CommandTypes.SelectMany(x => x.GetMethods()).ToList();
     }
 
-    IEnumerable<Type> GetCommands()
+    private IEnumerable<Type> GetCommands()
     {
         return commandCollection.CommandTypes;
     }

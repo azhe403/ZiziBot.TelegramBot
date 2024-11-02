@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 using ZiziBot.TelegramBot.Framework.Engines;
 using ZiziBot.TelegramBot.Framework.Handlers;
@@ -87,22 +86,23 @@ public static class ClientExtension
             }
         }
 
-        services.AddScoped<BotMessageHandler>();
-        services.AddScoped<BotClientCollection>();
+        services.AddSingleton<BotEngineHandler>();
+        services.AddSingleton<BotClientCollection>();
+        services.AddScoped<BotUpdateHandler>();
 
         return services;
     }
 
     private static IServiceCollection EnablePollingEngine(this IServiceCollection services)
     {
-        services.AddScoped<IBotEngine, BotPollingEngine>();
+        services.AddSingleton<IBotEngine, BotPollingEngine>();
 
         return services;
     }
 
     private static IServiceCollection EnableWebhookEngine(this IServiceCollection services)
     {
-        services.AddScoped<IBotEngine, BotWebhookEngine>();
+        services.AddSingleton<IBotEngine, BotWebhookEngine>();
 
         return services;
     }
@@ -116,32 +116,30 @@ public static class ClientExtension
         return app;
     }
 
-    static void StartWebhookModeInternal(this IApplicationBuilder app)
+    private static void StartWebhookModeInternal(this IApplicationBuilder app)
     {
         if (app is WebApplication webApplication)
         {
             webApplication.MapPost(ValueConst.WebHookPath + "/{botId}", async (
                 HttpContext context,
-                ILogger<BotWebhookEngine> logger,
-                BotMessageHandler botMessageHandler,
+                BotEngineHandler botEngine,
                 BotClientCollection botClientCollection,
                 string botId,
                 Update update
             ) => {
                 var client = botClientCollection.Items.First(x => x.Client.BotId.ToString() == botId);
 
-                logger.LogDebug("Receiving update webhook engine. UpdateId: {UpdateId}", update.Id);
 
-                await botMessageHandler.Handle(client.Client, update, default);
+                await botEngine.UpdateHandler(client.Client, update, default);
+
                 await context.Response.WriteAsync("OK");
             });
         }
     }
 
-    async static Task<IApplicationBuilder> StartTelegramBot(this IApplicationBuilder app)
+    private async static Task<IApplicationBuilder> StartTelegramBot(this IApplicationBuilder app)
     {
-        var scope = app.ApplicationServices.CreateScope();
-        var botEngine = scope.ServiceProvider.GetRequiredService<IBotEngine>();
+        var botEngine = app.ApplicationServices.GetRequiredService<IBotEngine>();
 
         await botEngine.Start();
 

@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
-using Telegram.Bot.Types;
 using ZiziBot.TelegramBot.Framework.Handlers;
 using ZiziBot.TelegramBot.Framework.Interfaces;
 using ZiziBot.TelegramBot.Framework.Models;
@@ -13,7 +12,7 @@ public class BotPollingEngine(
     ILogger<BotPollingEngine> logger,
     List<BotTokenConfig> botTokenConfigs,
     BotClientCollection botClientCollection,
-    BotMessageHandler botMessageHandler
+    BotEngineHandler botEngineHandler
 ) : IBotEngine
 {
     public async Task Start(BotClientItem clients)
@@ -28,7 +27,7 @@ public class BotPollingEngine(
 
             await clients.Client.DeleteWebhookAsync();
 
-            clients.Client.StartReceiving(UpdateHandler, ErrorHandler);
+            clients.Client.StartReceiving(botEngineHandler.UpdateHandler, ErrorHandler);
             botClientCollection.Items.Add(clients);
         }
         catch (Exception exception)
@@ -70,11 +69,5 @@ public class BotPollingEngine(
     {
         logger.LogError(exception, "Bot polling engine error. Source: {Source}", errorSource);
         return Task.CompletedTask;
-    }
-
-    private async Task UpdateHandler(ITelegramBotClient botClient, Update update, CancellationToken token)
-    {
-        logger.LogDebug("Receiving update polling engine. UpdateId: {UpdateId}, UpdateType: {UpdateType}", update.Id, update.Type);
-        await botMessageHandler.Handle(botClient, update, token);
     }
 }

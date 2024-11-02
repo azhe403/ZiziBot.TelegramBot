@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Telegram.Bot;
-using ZiziBot.TelegramBot.Framework.Handlers;
 using ZiziBot.TelegramBot.Framework.Interfaces;
 using ZiziBot.TelegramBot.Framework.Models;
 using ZiziBot.TelegramBot.Framework.Models.Configs;
@@ -12,8 +11,7 @@ public class BotWebhookEngine(
     ILogger<BotWebhookEngine> logger,
     List<BotTokenConfig> botTokenConfigs,
     BotClientCollection botClientCollection,
-    BotEngineConfig botEngineConfig,
-    BotMessageHandler botMessageHandler
+    BotEngineConfig botEngineConfig
 ) : IBotEngine
 {
     public async Task Start(BotClientItem clients)
