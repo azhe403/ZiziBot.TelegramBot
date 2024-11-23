@@ -9,7 +9,7 @@ namespace ZiziBot.TelegramBot.Framework.Models;
 
 public partial class CommandData
 {
-    public async Task<Message> SendMessageText(
+    public async Task<Message> SendMessage(
         string text,
         int? messageThreadId = default,
         ParseMode parseMode = default,
@@ -37,7 +37,21 @@ public partial class CommandData
             replyParameters.MessageId = MessageId;
         }
 
-        return await BotClient.SendTextMessageAsync(Chat, text, messageThreadId, parseMode, entities, linkPreviewOptions, disableNotification, protectContent, messageEffectId, replyParameters, replyMarkup, businessConnectionId, cancellationToken);
+        return await BotClient.SendMessage(
+            chatId: Chat,
+            text: text,
+            messageThreadId: messageThreadId,
+            parseMode: parseMode,
+            entities: entities,
+            linkPreviewOptions: linkPreviewOptions,
+            disableNotification: disableNotification,
+            protectContent: protectContent,
+            messageEffectId: messageEffectId,
+            replyParameters: replyParameters,
+            replyMarkup: replyMarkup,
+            businessConnectionId: businessConnectionId,
+            cancellationToken: cancellationToken
+        );
     }
 
     public async Task AnswerInlineQuery(
@@ -52,6 +66,14 @@ public partial class CommandData
         ArgumentNullException.ThrowIfNull(BotClient);
         ArgumentException.ThrowIfNullOrEmpty(InlineQueryId);
 
-        await BotClient.AnswerInlineQueryAsync(InlineQueryId, results, cacheTime, isPersonal, nextOffset, button, cancellationToken);
+        await BotClient.AnswerInlineQuery(
+            inlineQueryId: InlineQueryId,
+            results: results,
+            cacheTime: cacheTime,
+            isPersonal: isPersonal,
+            nextOffset: nextOffset,
+            button: button,
+            cancellationToken: cancellationToken
+        );
     }
 }
