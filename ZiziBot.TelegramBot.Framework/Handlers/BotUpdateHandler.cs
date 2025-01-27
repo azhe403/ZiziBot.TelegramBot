@@ -9,6 +9,7 @@ using ZiziBot.TelegramBot.Framework.Helpers;
 using ZiziBot.TelegramBot.Framework.Interfaces;
 using ZiziBot.TelegramBot.Framework.Models;
 using ZiziBot.TelegramBot.Framework.Models.Configs;
+using ZiziBot.TelegramBot.Framework.Models.Enums;
 
 namespace ZiziBot.TelegramBot.Framework.Handlers;
 
@@ -208,7 +209,16 @@ public class BotUpdateHandler(
         var method = BotMethods.Find(x => x.GetCustomAttributes<CommandAttribute>().Any(a => message.Text?.Split(" ").FirstOrDefault()?.Equals($"/{a.Path}") ?? false));
 
         if (method == null)
-            method = BotMethods.Find(x => x.GetCustomAttributes<TextCommandAttribute>().Any(a => message.Text?.Equals(a.Command) ?? false));
+        {
+            var messageText = message.Text ?? string.Empty;
+            method = BotMethods.Find(x => x.GetCustomAttributes<TextCommandAttribute>().Any(a => {
+                return a.ComparisonType switch {
+                    ComparisonType.CommandLike => messageText.Split(' ').FirstOrDefault()?.Equals(a.Command, StringComparison.OrdinalIgnoreCase) ?? false,
+                    ComparisonType.Contains => messageText.Contains(a.Command, StringComparison.OrdinalIgnoreCase),
+                    _ => messageText.Equals(a.Command, StringComparison.OrdinalIgnoreCase)
+                };
+            }));
+        }
 
         if (method == null)
             method = BotMethods.Find(x => x.GetCustomAttributes<TypedCommandAttribute>().Any(a => message.Type == a.MessageType));
