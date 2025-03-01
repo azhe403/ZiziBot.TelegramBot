@@ -11,16 +11,16 @@ public partial class CommandData
 {
     public async Task<Message> SendMessage(
         string text,
-        int? messageThreadId = default,
+        int? messageThreadId = null,
         ParseMode parseMode = default,
-        IEnumerable<MessageEntity>? entities = default,
-        LinkPreviewOptions? linkPreviewOptions = default,
-        bool disableNotification = default,
-        bool protectContent = default,
-        string? messageEffectId = default,
-        ReplyParameters? replyParameters = default,
-        IReplyMarkup? replyMarkup = default,
-        string? businessConnectionId = default,
+        IEnumerable<MessageEntity>? entities = null,
+        LinkPreviewOptions? linkPreviewOptions = null,
+        bool disableNotification = false,
+        bool protectContent = false,
+        string? messageEffectId = null,
+        ReplyParameters? replyParameters = null,
+        ReplyMarkup? replyMarkup = null,
+        string? businessConnectionId = null,
         CancellationToken cancellationToken = default
     )
     {
@@ -56,10 +56,10 @@ public partial class CommandData
 
     public async Task AnswerInlineQuery(
         IEnumerable<InlineQueryResult> results,
-        int? cacheTime = default,
-        bool isPersonal = default,
-        string? nextOffset = default,
-        InlineQueryResultsButton? button = default,
+        int? cacheTime = null,
+        bool isPersonal = false,
+        string? nextOffset = null,
+        InlineQueryResultsButton? button = null,
         CancellationToken cancellationToken = default
     )
     {
