@@ -25,7 +25,7 @@ public class BotPollingEngine(
                 return;
             }
 
-            await clients.Client.DeleteWebhookAsync();
+            await clients.Client.DeleteWebhook();
 
             clients.Client.StartReceiving(botEngineHandler.UpdateHandler, ErrorHandler);
             botClientCollection.Items.Add(clients);

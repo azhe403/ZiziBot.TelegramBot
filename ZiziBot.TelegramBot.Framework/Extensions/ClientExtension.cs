@@ -17,7 +17,7 @@ namespace ZiziBot.TelegramBot.Framework.Extensions;
 
 public static class ClientExtension
 {
-    public static IServiceCollection AddZiziBotTelegramBot(this IServiceCollection services, BotEngineConfig? engineConfig = default)
+    public static IServiceCollection AddZiziBotTelegramBot(this IServiceCollection services, BotEngineConfig? engineConfig = null)
     {
         services.AddSingleton(provider => {
             var botCommandCollection = new BotCommandCollection() {
@@ -107,7 +107,7 @@ public static class ClientExtension
         return services;
     }
 
-    public async static Task<IApplicationBuilder> UseZiziBotTelegramBot(this IApplicationBuilder app)
+    public static async Task<IApplicationBuilder> UseZiziBotTelegramBot(this IApplicationBuilder app)
     {
         app.StartWebhookModeInternal();
 
@@ -130,14 +130,14 @@ public static class ClientExtension
                 var client = botClientCollection.Items.First(x => x.Client.BotId.ToString() == botId);
 
 
-                await botEngine.UpdateHandler(client.Client, update, default);
+                await botEngine.UpdateHandler(client.Client, update, CancellationToken.None);
 
                 await context.Response.WriteAsync("OK");
-            });
+            }).ExcludeFromDescription();
         }
     }
 
-    private async static Task<IApplicationBuilder> StartTelegramBot(this IApplicationBuilder app)
+    private static async Task<IApplicationBuilder> StartTelegramBot(this IApplicationBuilder app)
     {
         var botEngine = app.ApplicationServices.GetRequiredService<IBotEngine>();
 

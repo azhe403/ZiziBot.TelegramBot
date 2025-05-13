@@ -24,12 +24,12 @@ public class BotWebhookEngine(
                 return;
             }
 
-            await clients.Client.DeleteWebhookAsync();
+            await clients.Client.DeleteWebhook();
 
             var webhookUrl = botEngineConfig.WebhookUrl + "/" + ValueConst.WebHookPath + "/" + clients.Client.BotId;
             logger.LogDebug("Setting up Webhook url for Bot {BotId} to {WebhookUrl}", clients.Client.BotId, webhookUrl);
 
-            await clients.Client.SetWebhookAsync(webhookUrl);
+            await clients.Client.SetWebhook(webhookUrl);
 
             botClientCollection.Items.Add(clients);
         }

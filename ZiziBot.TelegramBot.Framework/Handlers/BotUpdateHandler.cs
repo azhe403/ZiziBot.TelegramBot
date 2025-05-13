@@ -48,7 +48,7 @@ public class BotUpdateHandler(
             if (method == null)
             {
                 logger.LogWarning("No handler for {UpdateType} in UpdateId: {UpdateId}", update.Type, update.Id);
-                return default;
+                return null;
             }
 
             method.Update = update;
@@ -61,7 +61,7 @@ public class BotUpdateHandler(
             logger.LogError(exception, "Error on message handler");
         }
 
-        return default;
+        return null;
     }
 
     private async Task<object?> OnMessage(ITelegramBotClient botClient, Update update, CancellationToken token)
@@ -74,7 +74,7 @@ public class BotUpdateHandler(
             if (method == null)
             {
                 logger.LogWarning("No handler for MessageId: {MessageId} in UpdateId: {UpdateId}", message?.MessageId, update.Id);
-                return default;
+                return null;
             }
 
             method.Update = update;
@@ -88,13 +88,13 @@ public class BotUpdateHandler(
             logger.LogError(exception, "Error on message handler");
         }
 
-        return default;
+        return null;
     }
 
     private async Task<object?> InvokeMethod(ITelegramBotClient client, BotCommandInfo? botCommandInfo)
     {
         if (botCommandInfo is null)
-            return default;
+            return null;
 
         List<object> paramList = [];
         var methodParams = botCommandInfo.Method.GetParameters();
@@ -123,20 +123,22 @@ public class BotUpdateHandler(
         var passedMiddlewareCount = 0;
         foreach (var command in beforeCommands)
         {
-            logger.LogDebug("BeforeMiddleware - Invoking: {Middleware}", command.GetType().Name);
+            var middlewareName = command.GetType().Name;
+
+            logger.LogDebug("BeforeMiddleware - Invoking: {Middleware}", middlewareName);
             await command.ExecuteAsync(commandData, data => {
                 passedMiddlewareCount += 1;
                 return Task.CompletedTask;
             });
 
-            logger.LogDebug("BeforeMiddleware - Complete: {Middleware}", command.GetType().Name);
+            logger.LogDebug("BeforeMiddleware - Complete: {Middleware}", middlewareName);
         }
 
         if (beforeCommands.Count != passedMiddlewareCount)
         {
-            logger.LogDebug("Handler stop because middleware not passed");
+            logger.LogDebug("Handler stops because middleware is not passed");
 
-            return default;
+            return null;
         }
         #endregion
 
@@ -154,9 +156,11 @@ public class BotUpdateHandler(
 
         foreach (var command in afterCommands)
         {
-            logger.LogDebug("AfterMiddleware - Invoking: {Middleware}", command.GetType().Name);
+            var middlewareName = command.GetType().Name;
+
+            logger.LogDebug("AfterMiddleware - Invoking: {Middleware}", middlewareName);
             await command.ExecuteAsync(commandData);
-            logger.LogDebug("AfterMiddleware - Complete: {Middleware}", command.GetType().Name);
+            logger.LogDebug("AfterMiddleware - Complete: {Middleware}", middlewareName);
         }
         #endregion
 
@@ -178,7 +182,7 @@ public class BotUpdateHandler(
             };
         }
 
-        return default;
+        return null;
     }
 
     private BotCommandInfo? GetMethod(InlineQuery inlineQuery)
@@ -201,7 +205,7 @@ public class BotUpdateHandler(
             };
         }
 
-        return default;
+        return null;
     }
 
     private BotCommandInfo? GetMethod(Message message)
@@ -236,7 +240,7 @@ public class BotUpdateHandler(
             };
         }
 
-        return default;
+        return null;
     }
     #endregion
 
