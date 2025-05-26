@@ -19,6 +19,10 @@ public partial class CommandData
     #region CallbackQuery
     public CallbackQuery? CallbackQuery => Update.CallbackQuery;
     public string CallbackQueryId => CallbackQuery?.Id ?? string.Empty;
+    public string CallbackQueryData => CallbackQuery?.Data ?? string.Empty;
+    public string[] CallbackQueryDatas => CallbackQueryData.Split(" ");
+    public string CallbackQueryCmd => CallbackQueryDatas.FirstOrDefault() ?? string.Empty;
+    public string CallbackQueryParam => string.Join(" ", CallbackQueryDatas.Skip(1));
     #endregion
 
     #region InlineQuery

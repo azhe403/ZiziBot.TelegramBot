@@ -42,6 +42,7 @@ public class BotUpdateHandler(
         {
             var method = update.Type switch {
                 UpdateType.InlineQuery => GetMethod(update.InlineQuery!),
+                UpdateType.CallbackQuery => GetMethod(update.CallbackQuery!),
                 _ => GetMethod(update)
             };
 
@@ -195,6 +196,29 @@ public class BotUpdateHandler(
         {
             logger.LogDebug("Fallback to default InlineQuery for InlineQueryId: {InlineQueryId}", inlineQuery.Id);
             method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<InlineQueryAttribute>().Any());
+        }
+
+        if (method != null)
+        {
+            return new BotCommandInfo() {
+                ControllerType = BotCommands.Single(x => x == method.DeclaringType),
+                Method = method,
+            };
+        }
+
+        return null;
+    }
+
+    private BotCommandInfo? GetMethod(CallbackQuery callbackQuery)
+    {
+        var callbackQueryCommands = callbackQuery.Data?.Split(" ");
+        var callbackQueryCommand = callbackQueryCommands?.FirstOrDefault();
+        var method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<CallbackAttribute>().Any(attribute => attribute.Command == callbackQueryCommand));
+        if (method == null)
+        {
+            logger.LogDebug("Fallback to default CallbackQuery for CallbackQuery: {CallbackQueryId}", callbackQuery.Id);
+            method = BotMethods.Where(x => x.GetCustomAttributes<CallbackAttribute>().Any())
+                .FirstOrDefault(x => string.IsNullOrEmpty(x.GetCustomAttribute<CallbackAttribute>()?.Command));
         }
 
         if (method != null)

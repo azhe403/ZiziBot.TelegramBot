@@ -76,4 +76,17 @@ public partial class CommandData
             cancellationToken: cancellationToken
         );
     }
+
+    public async Task AnswerCallbackQuery(
+        string? text = null,
+        bool showAlert = false,
+        string? url = null,
+        int? cacheTime = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        ArgumentNullException.ThrowIfNull(BotClient);
+
+        await BotClient.AnswerCallbackQuery(CallbackQueryId, text, showAlert, url, cacheTime, cancellationToken);
+    }
 }
