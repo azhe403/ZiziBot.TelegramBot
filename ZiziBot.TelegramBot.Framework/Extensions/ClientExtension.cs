@@ -127,13 +127,32 @@ public static class ClientExtension
                 string botId,
                 Update update
             ) => {
-                var client = botClientCollection.Items.First(x => x.Client.BotId.ToString() == botId);
-
+                var client = botClientCollection.Items.FirstOrDefault(x => x.Client.BotId.ToString() == botId);
+                if (client == null)
+                {
+                    await context.Response.WriteAsync("Bot Client not found!");
+                    return;
+                }
 
                 await botEngine.UpdateHandler(client.Client, update, CancellationToken.None);
 
                 await context.Response.WriteAsync("OK");
             }).ExcludeFromDescription();
+
+            webApplication.MapGet(ValueConst.WebHookPath + "/{botId}", async (
+                HttpContext context,
+                BotClientCollection botClientCollection,
+                string botId
+            ) => {
+                var client = botClientCollection.Items.FirstOrDefault(x => x.Client.BotId.ToString() == botId);
+                if (client == null)
+                {
+                    await context.Response.WriteAsync("Bot Client not found!");
+                    return;
+                }
+
+                await context.Response.WriteAsync($"Hi!, set this URL for WebHook for {botId}");
+            });
         }
     }
 
