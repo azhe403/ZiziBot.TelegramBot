@@ -26,7 +26,7 @@ public class BotWebhookEngine(
 
             await clients.Client.DeleteWebhook();
 
-            var webhookUrl = botEngineConfig.WebhookUrl + "/" + ValueConst.WebHookPath + "/" + clients.Client.BotId;
+            var webhookUrl = botEngineConfig.WebhookUrl + "/" + ValueConst.WebHookPath + "/" + clients.BotToken;
             logger.LogDebug("Setting up Webhook url for Bot {BotId} to {WebhookUrl}", clients.Client.BotId, webhookUrl);
 
             await clients.Client.SetWebhook(webhookUrl);

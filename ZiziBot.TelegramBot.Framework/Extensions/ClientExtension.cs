@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using ZiziBot.TelegramBot.Framework.Engines;
 using ZiziBot.TelegramBot.Framework.Handlers;
@@ -120,38 +121,39 @@ public static class ClientExtension
     {
         if (app is WebApplication webApplication)
         {
-            webApplication.MapPost(ValueConst.WebHookPath + "/{botId}", async (
+            webApplication.MapPost(ValueConst.WebHookPath + "/{botToken}", async (
                 HttpContext context,
                 BotEngineHandler botEngine,
                 BotClientCollection botClientCollection,
-                string botId,
+                string botToken,
                 Update update
             ) => {
-                var client = botClientCollection.Items.FirstOrDefault(x => x.Client.BotId.ToString() == botId);
-                if (client == null)
+                var bot = botClientCollection.Items.FirstOrDefault(x => x.BotToken == botToken);
+                if (bot == null)
                 {
                     await context.Response.WriteAsync("Bot Client not found!");
                     return;
                 }
 
-                await botEngine.UpdateHandler(client.Client, update, CancellationToken.None);
+                await botEngine.UpdateHandler(bot.Client, update, CancellationToken.None);
 
                 await context.Response.WriteAsync("OK");
-            }).ExcludeFromDescription();
+            });
 
-            webApplication.MapGet(ValueConst.WebHookPath + "/{botId}", async (
+            webApplication.MapGet(ValueConst.WebHookPath + "/{botToken}", async (
                 HttpContext context,
                 BotClientCollection botClientCollection,
-                string botId
+                string botToken
             ) => {
-                var client = botClientCollection.Items.FirstOrDefault(x => x.Client.BotId.ToString() == botId);
-                if (client == null)
+                var bot = botClientCollection.Items.FirstOrDefault(x => x.BotToken == botToken);
+                if (bot == null)
                 {
                     await context.Response.WriteAsync("Bot Client not found!");
                     return;
                 }
 
-                await context.Response.WriteAsync($"Hi!, set this URL for WebHook for {botId}");
+                var me = await bot.Client.GetMe();
+                await context.Response.WriteAsync($"Hi!, please set this URL for WebHook for {me.Username} for activate");
             });
         }
     }
