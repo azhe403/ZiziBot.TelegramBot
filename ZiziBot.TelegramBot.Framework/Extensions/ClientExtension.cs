@@ -20,9 +20,11 @@ public static class ClientExtension
 {
     public static IServiceCollection AddZiziBotTelegramBot(this IServiceCollection services, BotEngineConfig? engineConfig = null)
     {
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
         services.AddSingleton(provider => {
             var botCommandCollection = new BotCommandCollection() {
-                CommandTypes = AppDomain.CurrentDomain.GetAssemblies()
+                CommandTypes = assemblies
                     .SelectMany(s => s.GetTypes())
                     .Where(x => x.IsSubclassOf(typeof(BotCommandController)))
             };
@@ -30,12 +32,12 @@ public static class ClientExtension
             return botCommandCollection;
         });
 
-        services.Scan(selector => selector.FromAssemblies(AppDomain.CurrentDomain.GetAssemblies())
+        services.Scan(selector => selector.FromAssemblies(assemblies)
             .AddClasses(filter => filter.AssignableTo<IBeforeCommand>())
             .As<IBeforeCommand>()
             .WithTransientLifetime());
 
-        services.Scan(selector => selector.FromAssemblies(AppDomain.CurrentDomain.GetAssemblies())
+        services.Scan(selector => selector.FromAssemblies(assemblies)
             .AddClasses(filter => filter.AssignableTo<IAfterCommand>())
             .As<IAfterCommand>()
             .WithTransientLifetime());
