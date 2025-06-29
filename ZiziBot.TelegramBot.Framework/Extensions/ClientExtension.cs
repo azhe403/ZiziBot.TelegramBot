@@ -35,12 +35,12 @@ public static class ClientExtension
         services.Scan(selector => selector.FromAssemblies(assemblies)
             .AddClasses(filter => filter.AssignableTo<IBeforeCommand>())
             .As<IBeforeCommand>()
-            .WithTransientLifetime());
+            .WithScopedLifetime());
 
         services.Scan(selector => selector.FromAssemblies(assemblies)
             .AddClasses(filter => filter.AssignableTo<IAfterCommand>())
             .As<IAfterCommand>()
-            .WithTransientLifetime());
+            .WithScopedLifetime());
 
         using (var provider = services.BuildServiceProvider())
         {
