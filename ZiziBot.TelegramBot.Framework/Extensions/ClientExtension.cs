@@ -1,17 +1,13 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Telegram.Bot;
-using Telegram.Bot.Types;
 using ZiziBot.TelegramBot.Framework.Engines;
 using ZiziBot.TelegramBot.Framework.Handlers;
 using ZiziBot.TelegramBot.Framework.Interfaces;
 using ZiziBot.TelegramBot.Framework.Models;
 using ZiziBot.TelegramBot.Framework.Models.Configs;
-using ZiziBot.TelegramBot.Framework.Models.Constants;
 using ZiziBot.TelegramBot.Framework.Models.Enums;
 
 namespace ZiziBot.TelegramBot.Framework.Extensions;
@@ -42,50 +38,52 @@ public static class ClientExtension
             .As<IAfterCommand>()
             .WithScopedLifetime());
 
-        using (var provider = services.BuildServiceProvider())
+        using var provider = services.BuildServiceProvider();
+
+        var hostingEnvironment = provider.GetRequiredService<IWebHostEnvironment>();
+
+        var internalEngineConfig = new BotEngineConfig();
+
+        if (engineConfig == null)
         {
-            var hostingEnvironment = provider.GetRequiredService<IWebHostEnvironment>();
+            var botConfigurations = new List<BotTokenConfig>();
+            var configuration = provider.GetRequiredService<IConfiguration>();
 
-            var internalEngineConfig = new BotEngineConfig();
-            if (engineConfig == null)
+            configuration.GetSection(BotTokenConfig.CONFIG_PATH).Bind(botConfigurations);
+            configuration.GetSection(BotEngineConfig.CONFIG_PATH).Bind(internalEngineConfig);
+
+            services.AddSingleton(botConfigurations);
+            services.AddSingleton(internalEngineConfig);
+        }
+        else
+        {
+            var configBot = engineConfig.Bot;
+            if (configBot == null)
+                throw new ApplicationException("Bot config is null");
+
+            services.AddSingleton(configBot);
+            services.AddSingleton(engineConfig);
+            internalEngineConfig = engineConfig;
+        }
+
+
+        switch (internalEngineConfig.EngineMode)
+        {
+            case BotEngineMode.Webhook:
+                services.EnableWebhookEngine();
+                break;
+            case BotEngineMode.Polling:
+                services.EnablePollingEngine();
+                break;
+            case BotEngineMode.Auto:
+            default:
             {
-                var botConfigurations = new List<BotTokenConfig>();
-                var configuration = provider.GetRequiredService<IConfiguration>();
-
-                configuration.GetSection(BotTokenConfig.CONFIG_PATH).Bind(botConfigurations);
-                configuration.GetSection(BotEngineConfig.CONFIG_PATH).Bind(internalEngineConfig);
-                services.AddSingleton(botConfigurations);
-                services.AddSingleton(internalEngineConfig);
-            }
-            else
-            {
-                if (engineConfig.Bot == null)
-                    throw new ArgumentNullException(nameof(engineConfig.Bot));
-
-                services.AddSingleton(engineConfig.Bot);
-                services.AddSingleton(engineConfig);
-                internalEngineConfig = engineConfig;
-            }
-
-
-            switch (internalEngineConfig.EngineMode)
-            {
-                case BotEngineMode.Webhook:
-                    services.EnableWebhookEngine();
-                    break;
-                case BotEngineMode.Polling:
+                if (hostingEnvironment.IsDevelopment())
                     services.EnablePollingEngine();
-                    break;
-                case BotEngineMode.Auto:
-                default:
-                {
-                    if (hostingEnvironment.IsDevelopment())
-                        services.EnablePollingEngine();
-                    else
-                        services.EnableWebhookEngine();
+                else
+                    services.EnableWebhookEngine();
 
-                    break;
-                }
+                break;
             }
         }
 
@@ -117,47 +115,6 @@ public static class ClientExtension
         _ = await app.StartTelegramBot();
 
         return app;
-    }
-
-    private static void StartWebhookModeInternal(this IApplicationBuilder app)
-    {
-        if (app is WebApplication webApplication)
-        {
-            webApplication.MapPost(ValueConst.WebHookPath + "/{botToken}", async (
-                HttpContext context,
-                BotEngineHandler botEngine,
-                BotClientCollection botClientCollection,
-                string botToken,
-                Update update
-            ) => {
-                var bot = botClientCollection.Items.FirstOrDefault(x => x.BotToken == botToken);
-                if (bot == null)
-                {
-                    await context.Response.WriteAsync("Bot Client not found!");
-                    return;
-                }
-
-                await botEngine.UpdateHandler(bot.Client, update, CancellationToken.None);
-
-                await context.Response.WriteAsync("OK");
-            });
-
-            webApplication.MapGet(ValueConst.WebHookPath + "/{botToken}", async (
-                HttpContext context,
-                BotClientCollection botClientCollection,
-                string botToken
-            ) => {
-                var bot = botClientCollection.Items.FirstOrDefault(x => x.BotToken == botToken);
-                if (bot == null)
-                {
-                    await context.Response.WriteAsync("Bot Client not found!");
-                    return;
-                }
-
-                var me = await bot.Client.GetMe();
-                await context.Response.WriteAsync($"Hi!, please set this URL for WebHook for {me.Username} for activate");
-            });
-        }
     }
 
     private static async Task<IApplicationBuilder> StartTelegramBot(this IApplicationBuilder app)
