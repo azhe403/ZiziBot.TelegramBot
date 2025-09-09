@@ -23,9 +23,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="JetBrains.Annotations" Version="2025.2.0" />
+        <PackageReference Include="JetBrains.Annotations" Version="2025.2.2" />
         <PackageReference Include="Scrutor" Version="6.1.0"/>
-        <PackageReference Include="WTelegramBot" Version="9.1.0" />
+        <PackageReference Include="WTelegramBot" Version="9.2.0" />
     </ItemGroup>
 
 </Project>
