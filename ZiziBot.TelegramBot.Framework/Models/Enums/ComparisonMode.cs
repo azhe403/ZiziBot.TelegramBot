@@ -1,10 +1,13 @@
 ﻿namespace ZiziBot.TelegramBot.Framework.Models.Enums;
 
-public enum ComparisonType
+public enum ComparisonMode
 {
     Match,
     CommandLike,
-    Pattern,
+    StartWith,
+    FirstWord,
     Contains,
-    Regex
+    Pattern,
+    Regex,
+    Any
 }

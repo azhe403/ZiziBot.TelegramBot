@@ -17,9 +17,9 @@ public class BotEngineHandler(
     {
         var updateHandlerInternal = UpdateHandlerInternal(botClient, update, token);
 
-        if (engineConfig.ExecutionStrategy == ExecutionStrategy.Await)
+        if (engineConfig.ExecutionMode == ExecutionMode.Await)
             await updateHandlerInternal;
-        else if (engineConfig.ExecutionStrategy == ExecutionStrategy.Background)
+        else if (engineConfig.ExecutionMode == ExecutionMode.Background)
             _ = updateHandlerInternal;
     }
 

@@ -1,6 +1,6 @@
 ﻿namespace ZiziBot.TelegramBot.Framework.Models.Enums;
 
-public enum ReplyStrategy
+public enum ReplyMode
 {
     Default,
     ReplyToSender,

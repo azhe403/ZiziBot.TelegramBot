@@ -240,9 +240,10 @@ public class BotUpdateHandler(
         {
             var messageText = message.Text ?? string.Empty;
             method = BotMethods.Find(x => x.GetCustomAttributes<TextCommandAttribute>().Any(a => {
-                return a.ComparisonType switch {
-                    ComparisonType.CommandLike => messageText.Split(' ').FirstOrDefault()?.Equals(a.Command, StringComparison.OrdinalIgnoreCase) ?? false,
-                    ComparisonType.Contains => messageText.Contains(a.Command, StringComparison.OrdinalIgnoreCase),
+                return a.ComparisonMode switch
+                {
+                    ComparisonMode.CommandLike => messageText.Split(' ').FirstOrDefault()?.Equals(a.Command, StringComparison.OrdinalIgnoreCase) ?? false,
+                    ComparisonMode.Contains => messageText.Contains(a.Command, StringComparison.OrdinalIgnoreCase),
                     _ => messageText.Equals(a.Command, StringComparison.OrdinalIgnoreCase)
                 };
             }));

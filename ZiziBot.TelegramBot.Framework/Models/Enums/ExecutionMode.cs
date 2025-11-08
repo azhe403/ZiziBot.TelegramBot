@@ -1,6 +1,6 @@
 ﻿namespace ZiziBot.TelegramBot.Framework.Models.Enums;
 
-public enum ExecutionStrategy
+public enum ExecutionMode
 {
     Await,
     Background
