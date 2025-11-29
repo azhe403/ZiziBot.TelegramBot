@@ -28,7 +28,9 @@ public class BotEngineHandler(
         await using var scope = serviceProvider.CreateAsyncScope();
         var messageHandler = scope.ServiceProvider.GetRequiredService<BotUpdateHandler>();
 
-        logger.LogDebug("Receiving update engine. UpdateId: {UpdateId}, UpdateType: {UpdateType}", update.Id, update.Type);
+        logger.LogDebug("Receiving update engine. UpdateId: {UpdateId}, UpdateType: {UpdateType}, ExecutionMode: {ExecutionMode}",
+            update.Id, update.Type, engineConfig.ExecutionMode);
+
         await messageHandler.Handle(botClient, update, token);
     }
 }

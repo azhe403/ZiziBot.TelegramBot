@@ -18,7 +18,8 @@ public static class ClientExtension
     {
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-        services.AddSingleton(provider => {
+        services.AddSingleton(provider =>
+        {
             var botCommandCollection = new BotCommandCollection() {
                 CommandTypes = assemblies
                     .SelectMany(s => s.GetTypes())
@@ -57,9 +58,7 @@ public static class ClientExtension
         }
         else
         {
-            var configBot = engineConfig.Bot;
-            if (configBot == null)
-                throw new ApplicationException("Bot config is null");
+            var configBot = engineConfig.Bot ?? throw new ApplicationException("Bot config is null");
 
             services.AddSingleton(configBot);
             services.AddSingleton(engineConfig);

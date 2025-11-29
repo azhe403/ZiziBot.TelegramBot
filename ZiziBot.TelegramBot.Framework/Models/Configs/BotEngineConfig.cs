@@ -11,6 +11,5 @@ public class BotEngineConfig
     public ReplyMode ReplyMode { get; set; }
     public ExecutionMode ExecutionMode { get; set; }
     public List<string>? DisabledMiddleware { get; set; }
-
-    public List<BotTokenConfig> Bot { get; set; }
+    public List<BotTokenConfig>? Bot { get; set; }
 }
