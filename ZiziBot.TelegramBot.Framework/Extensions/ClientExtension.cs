@@ -20,7 +20,8 @@ public static class ClientExtension
 
         services.AddSingleton(provider =>
         {
-            var botCommandCollection = new BotCommandCollection() {
+            var botCommandCollection = new BotCommandCollection()
+            {
                 CommandTypes = assemblies
                     .SelectMany(s => s.GetTypes())
                     .Where(x => x.IsSubclassOf(typeof(BotCommandController)))
@@ -54,14 +55,12 @@ public static class ClientExtension
             configuration.GetSection(BotEngineConfig.CONFIG_PATH).Bind(internalEngineConfig);
 
             services.AddSingleton(botConfigurations);
-            services.AddSingleton(internalEngineConfig);
         }
         else
         {
             var configBot = engineConfig.Bot ?? throw new ApplicationException("Bot config is null");
 
             services.AddSingleton(configBot);
-            services.AddSingleton(engineConfig);
             internalEngineConfig = engineConfig;
         }
 
@@ -70,22 +69,31 @@ public static class ClientExtension
         {
             case BotEngineMode.Webhook:
                 services.EnableWebhookEngine();
+                internalEngineConfig.ActualEngineMode = BotEngineMode.Webhook;
                 break;
             case BotEngineMode.Polling:
                 services.EnablePollingEngine();
+                internalEngineConfig.ActualEngineMode = BotEngineMode.Polling;
                 break;
             case BotEngineMode.Auto:
             default:
             {
                 if (hostingEnvironment.IsDevelopment())
+                {
                     services.EnablePollingEngine();
+                    internalEngineConfig.ActualEngineMode = BotEngineMode.Polling;
+                }
                 else
+                {
                     services.EnableWebhookEngine();
+                    internalEngineConfig.ActualEngineMode = BotEngineMode.Webhook;
+                }
 
                 break;
             }
         }
 
+        services.AddSingleton(internalEngineConfig);
         services.AddSingleton<BotEngineHandler>();
         services.AddSingleton<BotClientCollection>();
         services.AddScoped<BotUpdateHandler>();

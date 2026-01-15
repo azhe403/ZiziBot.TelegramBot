@@ -8,6 +8,7 @@ public class BotEngineConfig
 
     public string? WebhookUrl { get; set; }
     public BotEngineMode EngineMode { get; set; }
+    public BotEngineMode ActualEngineMode { get; set; }
     public ReplyMode ReplyMode { get; set; }
     public ExecutionMode ExecutionMode { get; set; }
     public List<string>? DisabledMiddleware { get; set; }

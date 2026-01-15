@@ -25,22 +25,46 @@ public class BotUpdateHandler(
     private List<MethodInfo> BotMethods => GetMethods();
 
     #region Invocation
-    public async Task<object?> Handle(ITelegramBotClient botClient, Update update, CancellationToken token)
+
+    public async Task<object?> HandleUpdate(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
-        var result = update.Type switch {
+        var result = update.Type switch
+        {
             UpdateType.Message => await OnMessage(botClient, update, token),
             UpdateType.EditedMessage => await OnMessage(botClient, update, token),
             _ => await OnUpdate(botClient, update, token)
         };
 
+        await TrackUpdate(botClient, token);
+
         return result;
+    }
+
+    private async Task TrackUpdate(ITelegramBotClient botClient, CancellationToken token)
+    {
+        const int limitWarning = 5;
+
+        if (botEngineConfig.ActualEngineMode == BotEngineMode.Polling)
+        {
+            var updates = await botClient.GetUpdates(cancellationToken: token);
+            var updatesLength = updates.Length;
+            var logLevel = updatesLength > limitWarning ? LogLevel.Warning : LogLevel.Debug;
+            logger.Log(logLevel, "Polling Mode - GetUpdates Count: {PendingCount}", updatesLength);
+        }
+        else
+        {
+            var webhookInfo = await botClient.GetWebhookInfo(cancellationToken: token);
+            var logLevel = webhookInfo.PendingUpdateCount > limitWarning ? LogLevel.Warning : LogLevel.Debug;
+            logger.Log(logLevel, "Webhook Mode - Pending Updates Count: {PendingCount}", webhookInfo.PendingUpdateCount);
+        }
     }
 
     private async Task<object?> OnUpdate(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
         try
         {
-            var method = update.Type switch {
+            var method = update.Type switch
+            {
                 UpdateType.InlineQuery => GetMethod(update.InlineQuery!),
                 UpdateType.CallbackQuery => GetMethod(update.CallbackQuery!),
                 _ => GetMethod(update)
@@ -100,7 +124,8 @@ public class BotUpdateHandler(
         List<object> paramList = [];
         var methodParams = botCommandInfo.Method.GetParameters();
 
-        var commandData = new CommandData() {
+        var commandData = new CommandData()
+        {
             BotToken = botClientCollection.Items.First(x => x.Client == client).BotToken,
             BotClient = client,
             EngineConfig = botEngineConfig,
@@ -110,24 +135,28 @@ public class BotUpdateHandler(
 
         if (methodParams.Any(x => x.ParameterType == typeof(CommandData)))
         {
-            paramList = [
+            paramList =
+            [
                 commandData
             ];
         }
 
         #region Before Command Middleware
+
         var beforeCommands = provider.GetServices<IBeforeCommand>()
             .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
             .Where(x => botEngineConfig.DisabledMiddleware?.Contains(x.GetType().Name) == false)
             .ToList();
 
         var passedMiddlewareCount = 0;
+
         foreach (var command in beforeCommands)
         {
             var middlewareName = command.GetType().Name;
 
             logger.LogDebug("BeforeMiddleware - Invoking: {Middleware}", middlewareName);
-            await command.ExecuteAsync(commandData, data => {
+            await command.ExecuteAsync(commandData, data =>
+            {
                 passedMiddlewareCount += 1;
                 return Task.CompletedTask;
             });
@@ -141,16 +170,20 @@ public class BotUpdateHandler(
 
             return null;
         }
+
         #endregion
 
         #region Invoke Command
+
         var controller = (BotCommandController)ActivatorUtilities.CreateInstance(provider, botCommandInfo.ControllerType);
 
         var invokeResult = await MethodHelper.InvokeMethod(botCommandInfo.Method, paramList, controller);
         logger.LogDebug("Successfully handled UpdateId: {UpdateId} for {UpdateType} ", botCommandInfo.Update!.Id, botCommandInfo.Update!.Type);
+
         #endregion
 
         #region After Command Middleware
+
         var afterCommands = provider.GetServices<IAfterCommand>()
             .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
             .ToList();
@@ -163,20 +196,24 @@ public class BotUpdateHandler(
             await command.ExecuteAsync(commandData);
             logger.LogDebug("AfterMiddleware - Complete: {Middleware}", middlewareName);
         }
+
         #endregion
 
         return invokeResult;
     }
+
     #endregion
 
     #region Command
+
     private BotCommandInfo? GetMethod(Update update)
     {
         var method = BotMethods.FirstOrDefault(info => info.GetCustomAttributes<UpdateCommandAttribute>().Any(a => a.UpdateType == update.Type));
 
         if (method != null)
         {
-            return new BotCommandInfo() {
+            return new BotCommandInfo()
+            {
                 ControllerType = BotCommands.Single(x => x == method.DeclaringType),
                 Method = method,
                 Update = update
@@ -200,7 +237,8 @@ public class BotUpdateHandler(
 
         if (method != null)
         {
-            return new BotCommandInfo() {
+            return new BotCommandInfo()
+            {
                 ControllerType = BotCommands.Single(x => x == method.DeclaringType),
                 Method = method,
             };
@@ -214,6 +252,7 @@ public class BotUpdateHandler(
         var callbackQueryCommands = callbackQuery.Data?.Split(" ");
         var callbackQueryCommand = callbackQueryCommands?.FirstOrDefault();
         var method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<CallbackAttribute>().Any(attribute => attribute.Command == callbackQueryCommand));
+
         if (method == null)
         {
             logger.LogDebug("Fallback to default CallbackQuery for CallbackQuery: {CallbackQueryId}", callbackQuery.Id);
@@ -223,7 +262,8 @@ public class BotUpdateHandler(
 
         if (method != null)
         {
-            return new BotCommandInfo() {
+            return new BotCommandInfo()
+            {
                 ControllerType = BotCommands.Single(x => x == method.DeclaringType),
                 Method = method,
             };
@@ -239,7 +279,8 @@ public class BotUpdateHandler(
         if (method == null)
         {
             var messageText = message.Text ?? string.Empty;
-            method = BotMethods.Find(x => x.GetCustomAttributes<TextCommandAttribute>().Any(a => {
+            method = BotMethods.Find(x => x.GetCustomAttributes<TextCommandAttribute>().Any(a =>
+            {
                 return a.ComparisonMode switch
                 {
                     ComparisonMode.CommandLike => messageText.Split(' ').FirstOrDefault()?.Equals(a.Command, StringComparison.OrdinalIgnoreCase) ?? false,
@@ -257,7 +298,8 @@ public class BotUpdateHandler(
 
         if (method != null)
         {
-            return new BotCommandInfo() {
+            return new BotCommandInfo()
+            {
                 ControllerType = BotCommands.Single(x => x == method.DeclaringType),
                 Method = method,
                 Message = message,
@@ -267,9 +309,11 @@ public class BotUpdateHandler(
 
         return null;
     }
+
     #endregion
 
     #region Reflection
+
     private List<MethodInfo> GetMethods()
     {
         return commandCollection.CommandTypes.SelectMany(x => x.GetMethods()).ToList();
@@ -279,5 +323,6 @@ public class BotUpdateHandler(
     {
         return commandCollection.CommandTypes;
     }
+
     #endregion
 }

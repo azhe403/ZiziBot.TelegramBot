@@ -31,6 +31,6 @@ public class BotEngineHandler(
         logger.LogDebug("Receiving update engine. UpdateId: {UpdateId}, UpdateType: {UpdateType}, ExecutionMode: {ExecutionMode}",
             update.Id, update.Type, engineConfig.ExecutionMode);
 
-        await messageHandler.Handle(botClient, update, token);
+        await messageHandler.HandleUpdate(botClient, update, token);
     }
 }
