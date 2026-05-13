@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -27,6 +29,9 @@ jobs:
           $build = (New-TimeSpan -Start (Get-Date -Year 2000 -Month 1 -Day 1) -End $date).Days
           $revision = "{0:D5}" -f [int]($date.TimeOfDay.TotalSeconds)
           $version = "$major.$minor.$build.$revision"
+          if ('${{ github.ref }}' -notlike 'refs/tags/v*') {
+            $version = "$version-beta"
+          }
           echo "version_number=$version" >> $env:GITHUB_OUTPUT
       - name: Build
         run: dotnet build --configuration Release --no-restore -p:Version=${{ steps.version.outputs.version_number }}
