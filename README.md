@@ -1,22 +1,25 @@
 ﻿# ZiziBot.TelegramBot
 
-**ZiziBot.TelegramBot** is a bot framework for helping command-based bot development. Some samples can check in **Sample** project.
+[![CI](https://github.com/ZiziBot/ZiziBot.TelegramBot/actions/workflows/publish.yml/badge.svg?branch=main)](https://github.com/ZiziBot/ZiziBot.TelegramBot/actions/workflows/publish.yml)
+[![ZiziBot.TelegramBot.Framework](https://img.shields.io/nuget/v/ZiziBot.TelegramBot.Framework.svg)](https://www.nuget.org/packages/ZiziBot.TelegramBot.Framework/)
 
-This framework support Polling and Webhook mode in AutoMode and enabled by default, it's mean in Local development running as Polling and after Deployment running as Webhook automatically. Fill some configuration in `appsettings.json` to started.
 
-This is a very early stage project, so nothing guarantee for breaking changes in the future.
+**ZiziBot.TelegramBot** is a bot framework designed to help with command-based bot development. Some samples can be found in the **Sample** project.
 
-This project is inspired by [VodemSharp/Allowed.Telegram.Bot](https://github.com/VodemSharp/Allowed.Telegram.Bot)
+This framework supports both Polling and Webhook modes in AutoMode, which is enabled by default. This means that during local development, it runs using Polling, and after deployment, it automatically switches to Webhook mode. Simply fill in the required configuration in `appsettings.json` to get started.
 
-# Demo project
+Please note that this is a very early-stage project, so there are no guarantees against breaking changes in the future.
+
+This project is inspired by [VodemSharp/Allowed.Telegram.Bot](https://github.com/VodemSharp/Allowed.Telegram.Bot).
+
+## Demo project
 
 1. [ZiziBot-Engine](https://github.com/azhe403/ZiziBot-Engine)
 
-# Thanks
+## Thanks
 
-Thanks to JetBrains have given us for
-<a href="https://www.jetbrains.com/?from=zizibot" target="_blank">dotUltimate</a> licenses.
+Thanks to JetBrains for providing us with <a href="https://www.jetbrains.com/?from=zizibot" target="_blank">dotUltimate</a> licenses.
 
 <a href="https://www.jetbrains.com/?from=zizibot" target="_blank">
-    <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" alt="Rider logo.">
+    <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" alt="JetBrains logo." width="200">
 </a>

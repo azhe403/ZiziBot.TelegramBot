@@ -19,7 +19,18 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build --configuration Release --no-restore
+      - name: Generate Version
+        id: version
+        shell: pwsh
+        run: |
+          $date = Get-Date
+          $major = $date.Year - 2000 + 200
+          $minor = $date.Month
+          $build = $date.DayOfYear
+          $revision = $date.Hour * 60 + $date.Minute
+          $version = "$major.$minor.$build.$revision"
+          echo "version_number=$version" >> $env:GITHUB_OUTPUT
       - name: Pack
-        run: dotnet pack --configuration Release --no-build --output .
+        run: dotnet pack --configuration Release --no-build --output . -p:Version=${{ steps.version.outputs.version_number }}
       - name: Push to NuGet
         run: dotnet nuget push *.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
