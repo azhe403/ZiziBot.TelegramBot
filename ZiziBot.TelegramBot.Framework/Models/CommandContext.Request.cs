@@ -7,7 +7,7 @@ using ZiziBot.TelegramBot.Framework.Models.Enums;
 
 namespace ZiziBot.TelegramBot.Framework.Models;
 
-public partial class CommandData
+public partial class CommandContext
 {
     public async Task<Message> SendMessage(
         string text,

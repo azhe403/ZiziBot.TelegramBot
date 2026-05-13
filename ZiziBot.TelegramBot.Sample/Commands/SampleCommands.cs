@@ -8,7 +8,7 @@ public class SampleCommands : BotCommandController
 {
     [Command("ping")]
     [TextCommand("ping")]
-    public async Task PingCommand(CommandData data)
+    public async Task PingCommand()
     {
         var replyMarkup = new InlineKeyboardMarkup([
             [
@@ -24,36 +24,38 @@ public class SampleCommands : BotCommandController
             ]
         ]);
 
-        await data.SendMessage("Pong!", replyMarkup: replyMarkup);
+        await SendMessage("Pong!", replyMarkup: replyMarkup);
     }
 
     [Command("start")]
-    public async Task StartCommand(CommandData data)
+    public async Task StartCommand()
     {
-        await data.SendMessage("Let's start!");
+        await SendMessage("Let's start!");
     }
 
     [Command("say")]
-    public async Task SayCommand(CommandData data)
+    public async Task SayCommand()
     {
-        await data.SendMessage($"You say: {data.CommandParam}!");
+        await SendMessage($"You say: {Context.CommandParam}!");
     }
 
     [DefaultCommand]
-    public async Task DefaultCommand(CommandData data)
+    public async Task DefaultCommand()
     {
-        await data.SendMessage("Default!");
+        await SendMessage("Default!");
     }
 
     [Callback("ping")]
-    public async Task PingCallback(CommandData data)
+    public async Task PingCallback()
     {
-        await data.AnswerCallbackQuery("User clicked Ping!");
+        await AnswerCallbackQuery("User clicked Ping!");
     }
 
     [Callback]
-    public async Task DefaultCallback(CommandData data)
+    public async Task DefaultCallback()
     {
-        await data.AnswerCallbackQuery($"Cmd: {data.CallbackQueryCmd}, Param: {data.CallbackQueryParam}");
+        var text = $"Cmd: {Context.CallbackQueryCmd}" +
+                   $"\nParam: {Context.CallbackQueryParam}";
+        await AnswerCallbackQuery(text, showAlert: true);
     }
 }

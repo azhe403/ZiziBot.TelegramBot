@@ -5,6 +5,6 @@ namespace ZiziBot.TelegramBot.Sample.Middlewares;
 
 public class AfterCommandMiddleware : IAfterCommand
 {
-    public async Task ExecuteAsync(CommandData commandData)
+    public async Task ExecuteAsync(CommandContext commandContext)
     { }
 }

@@ -7,5 +7,5 @@ namespace ZiziBot.TelegramBot.Framework.Interfaces;
 [UsedImplicitly(ImplicitUseTargetFlags.WithInheritors)]
 public interface IBeforeCommand
 {
-    Task ExecuteAsync(CommandData commandData, CommandDelegate next);
+    Task ExecuteAsync(CommandContext commandContext, CommandDelegate next);
 }

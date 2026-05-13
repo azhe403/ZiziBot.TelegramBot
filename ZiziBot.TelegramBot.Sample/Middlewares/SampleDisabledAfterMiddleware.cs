@@ -7,7 +7,7 @@ namespace ZiziBot.TelegramBot.Sample.Middlewares;
 [DisabledMiddleware]
 public class SampleDisabledAfterMiddleware : IAfterCommand
 {
-    public Task ExecuteAsync(CommandData commandData)
+    public Task ExecuteAsync(CommandContext commandContext)
     {
         throw new NotImplementedException();
     }

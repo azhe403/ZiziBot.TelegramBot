@@ -6,8 +6,8 @@ namespace ZiziBot.TelegramBot.Sample.Middlewares;
 
 public class BeforeCommandMiddleware : IBeforeCommand
 {
-    public async Task ExecuteAsync(CommandData commandData, CommandDelegate next)
+    public async Task ExecuteAsync(CommandContext commandContext, CommandDelegate next)
     {
-        await next(commandData);
+        await next(commandContext);
     }
 }

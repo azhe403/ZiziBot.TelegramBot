@@ -7,17 +7,17 @@ namespace ZiziBot.TelegramBot.Sample.Commands;
 public class InlineQueryCommands : BotCommandController
 {
     [InlineQuery]
-    public async Task InlineQueryCommand(CommandData data)
+    public async Task InlineQueryCommand()
     {
-        await data.AnswerInlineQuery(new List<InlineQueryResult>() {
+        await AnswerInlineQuery(new List<InlineQueryResult>() {
             new InlineQueryResultArticle("158cd95a-8f02-4a64-838e-78eab0fd53ac", "Default Inline", new InputTextMessageContent("Default Inline Content"))
         });
     }
 
     [InlineQuery("hello")]
-    public async Task InlineQueryCommandHello(CommandData data)
+    public async Task InlineQueryCommandHello()
     {
-        await data.AnswerInlineQuery(new List<InlineQueryResult>() {
+        await AnswerInlineQuery(new List<InlineQueryResult>() {
             new InlineQueryResultArticle("aa576dec-0727-4ea1-99ae-3c7cb20ea3c8", "Hello Inline", new InputTextMessageContent("Hello Inline Content"))
         });
     }

@@ -16,11 +16,15 @@ public static class MethodHelper
         {
             if (method.ReturnType == typeof(Task))
             {
-                await ((Task)method.Invoke(instance, parameters.ToArray()))!;
+                var task = method.Invoke(instance, parameters.ToArray()) as Task;
+                if (task != null) await task;
                 return null;
             }
 
-            return await ((Task<object?>)method.Invoke(instance, parameters.ToArray()))!;
+            var taskWithResult = method.Invoke(instance, parameters.ToArray()) as Task<object?>;
+            if (taskWithResult != null) return await taskWithResult;
+
+            return null;
         }
 
         return method.Invoke(instance, parameters.ToArray());

@@ -5,7 +5,7 @@ using ZiziBot.TelegramBot.Framework.Models.Configs;
 
 namespace ZiziBot.TelegramBot.Framework.Models;
 
-public partial class CommandData
+public partial class CommandContext
 {
     public required string BotToken { get; init; }
     public required ITelegramBotClient BotClient { get; init; }
@@ -56,6 +56,19 @@ public partial class CommandData
     public bool UserHasUsername => !string.IsNullOrEmpty(UserUsername);
     #endregion
 
+    #region Message
+    public Message? Message => Update.Message ?? Update.EditedMessage ?? CallbackQuery?.Message;
+    public int MessageId => Message?.MessageId ?? default;
+    public string? MessageText => Message?.Text ?? Message?.Caption;
+    public string[]? MessageTexts => MessageText?.Split(" ");
+    public Message? ReplyToMessage => Message?.ReplyToMessage?.Type is not (MessageType.ForumTopicCreated or MessageType.ForumTopicEdited) ? Message?.ReplyToMessage : default;
+    #endregion
+
+    #region Command
+    public string? Command => MessageTexts?.FirstOrDefault();
+    public string? CommandParam => MessageText?.Replace(Command ?? string.Empty, string.Empty).Trim();
+    #endregion
+
     #region Channel Post
     public Message? ChannelPost => Update.ChannelPost ?? Update.EditedChannelPost;
     public int ChannelPostId => ChannelPost?.MessageId ?? default;
@@ -69,14 +82,6 @@ public partial class CommandData
     public string? TopicName => EditedTopicName ?? CreatedTopicName;
     #endregion
 
-    #region Message
-    public Message? ReplyToMessage => Message?.ReplyToMessage?.Type is not (MessageType.ForumTopicCreated or MessageType.ForumTopicEdited) ? Message?.ReplyToMessage : default;
-    public Message? Message => Update.Message ?? Update.EditedMessage ?? CallbackQuery?.Message;
-    public int MessageId => Message?.MessageId ?? default;
-    public string MessageText => Message?.Text ?? string.Empty;
-    public string[] MessageTexts => MessageText.Split(" ");
-    #endregion
-
     #region Boolean
     public bool IsChannel => Update.Type is UpdateType.ChannelPost or UpdateType.EditedChannelPost;
     public bool IsPublicChat => Chat?.Type is ChatType.Group or ChatType.Supergroup;
@@ -85,9 +90,7 @@ public partial class CommandData
     #endregion
 
     #region Timestamp
-    public string TransactionId => Guid.NewGuid().ToString();
-    public DateTime RequestDate => DateTime.UtcNow;
+    public static string TransactionId => Guid.NewGuid().ToString();
+    public static DateTime RequestDate => DateTime.UtcNow;
     #endregion
-
-    public string? CommandParam { get; set; }
 }

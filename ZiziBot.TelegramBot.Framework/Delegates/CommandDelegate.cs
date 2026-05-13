@@ -2,4 +2,4 @@
 
 namespace ZiziBot.TelegramBot.Framework.Delegates;
 
-public delegate Task CommandDelegate(CommandData data);
+public delegate Task CommandDelegate(CommandContext data);

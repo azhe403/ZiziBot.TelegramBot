@@ -30,9 +30,9 @@ public class BotUpdateHandler(
     {
         var result = update.Type switch
         {
-            UpdateType.Message => await OnMessage(botClient, update, token),
-            UpdateType.EditedMessage => await OnMessage(botClient, update, token),
-            _ => await OnUpdate(botClient, update, token)
+            UpdateType.Message => await OnMessage(botClient, update),
+            UpdateType.EditedMessage => await OnMessage(botClient, update),
+            _ => await OnUpdate(botClient, update)
         };
 
         await TrackUpdate(botClient, token);
@@ -59,7 +59,7 @@ public class BotUpdateHandler(
         }
     }
 
-    private async Task<object?> OnUpdate(ITelegramBotClient botClient, Update update, CancellationToken token)
+    private async Task<object?> OnUpdate(ITelegramBotClient botClient, Update update)
     {
         try
         {
@@ -89,7 +89,7 @@ public class BotUpdateHandler(
         return null;
     }
 
-    private async Task<object?> OnMessage(ITelegramBotClient botClient, Update update, CancellationToken token)
+    private async Task<object?> OnMessage(ITelegramBotClient botClient, Update update)
     {
         try
         {
@@ -124,20 +124,19 @@ public class BotUpdateHandler(
         List<object> paramList = [];
         var methodParams = botCommandInfo.Method.GetParameters();
 
-        var commandData = new CommandData()
+        var commandContext = new CommandContext()
         {
             BotToken = botClientCollection.Items.First(x => x.Client == client).BotToken,
             BotClient = client,
             EngineConfig = botEngineConfig,
-            Update = botCommandInfo.Update!,
-            CommandParam = botCommandInfo.Params
+            Update = botCommandInfo.Update!
         };
 
-        if (methodParams.Any(x => x.ParameterType == typeof(CommandData)))
+        if (methodParams.Any(x => x.ParameterType == typeof(CommandContext)))
         {
             paramList =
             [
-                commandData
+                commandContext
             ];
         }
 
@@ -155,7 +154,7 @@ public class BotUpdateHandler(
             var middlewareName = command.GetType().Name;
 
             logger.LogDebug("BeforeMiddleware - Invoking: {Middleware}", middlewareName);
-            await command.ExecuteAsync(commandData, data =>
+            await command.ExecuteAsync(commandContext, data =>
             {
                 passedMiddlewareCount += 1;
                 return Task.CompletedTask;
@@ -176,6 +175,7 @@ public class BotUpdateHandler(
         #region Invoke Command
 
         var controller = (BotCommandController)ActivatorUtilities.CreateInstance(provider, botCommandInfo.ControllerType);
+        controller.Context = commandContext;
 
         var invokeResult = await MethodHelper.InvokeMethod(botCommandInfo.Method, paramList, controller);
         logger.LogDebug("Successfully handled UpdateId: {UpdateId} for {UpdateType} ", botCommandInfo.Update!.Id, botCommandInfo.Update!.Type);
@@ -193,7 +193,7 @@ public class BotUpdateHandler(
             var middlewareName = command.GetType().Name;
 
             logger.LogDebug("AfterMiddleware - Invoking: {Middleware}", middlewareName);
-            await command.ExecuteAsync(commandData);
+            await command.ExecuteAsync(commandContext);
             logger.LogDebug("AfterMiddleware - Complete: {Middleware}", middlewareName);
         }
 

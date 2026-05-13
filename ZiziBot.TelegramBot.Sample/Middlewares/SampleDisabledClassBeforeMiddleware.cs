@@ -6,7 +6,7 @@ namespace ZiziBot.TelegramBot.Sample.Middlewares;
 
 public class SampleDisabledClassBeforeMiddleware : IBeforeCommand
 {
-    public Task ExecuteAsync(CommandData commandData, CommandDelegate next)
+    public Task ExecuteAsync(CommandContext commandContext, CommandDelegate next)
     {
         throw new NotImplementedException();
     }
