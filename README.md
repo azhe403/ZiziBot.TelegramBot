@@ -1,6 +1,6 @@
 ﻿# ZiziBot.TelegramBot
 
-[![CI](https://github.com/ZiziBot/ZiziBot.TelegramBot/actions/workflows/publish.yml/badge.svg?branch=main)](https://github.com/ZiziBot/ZiziBot.TelegramBot/actions/workflows/publish.yml)
+[![CI](https://github.com/azhe403/ZiziBot.TelegramBot/actions/workflows/publish.yml/badge.svg?branch=main)](https://github.com/ZiziBot/ZiziBot.TelegramBot/actions/workflows/publish.yml)
 [![ZiziBot.TelegramBot.Framework](https://img.shields.io/nuget/v/ZiziBot.TelegramBot.Framework.svg)](https://www.nuget.org/packages/ZiziBot.TelegramBot.Framework/)
 
 
