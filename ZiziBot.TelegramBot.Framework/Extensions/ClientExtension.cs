@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using ZiziBot.TelegramBot.Framework.Engines;
 using ZiziBot.TelegramBot.Framework.Handlers;
 using ZiziBot.TelegramBot.Framework.Interfaces;
@@ -43,6 +44,7 @@ public static class ClientExtension
         using var provider = services.BuildServiceProvider();
 
         var hostingEnvironment = provider.GetRequiredService<IWebHostEnvironment>();
+        var logger = provider.GetRequiredService<ILogger<BotEngineHandler>>();
 
         var internalEngineConfig = new BotEngineConfig();
 
@@ -51,8 +53,8 @@ public static class ClientExtension
             var botConfigurations = new List<BotTokenConfig>();
             var configuration = provider.GetRequiredService<IConfiguration>();
 
-            configuration.GetSection(BotTokenConfig.CONFIG_PATH).Bind(botConfigurations);
-            configuration.GetSection(BotEngineConfig.CONFIG_PATH).Bind(internalEngineConfig);
+            configuration.GetSection(BotTokenConfig.ConfigPath).Bind(botConfigurations);
+            configuration.GetSection(BotEngineConfig.ConfigPath).Bind(internalEngineConfig);
 
             services.AddSingleton(botConfigurations);
         }
@@ -63,6 +65,8 @@ public static class ClientExtension
             services.AddSingleton(configBot);
             internalEngineConfig = engineConfig;
         }
+
+        logger.LogInformation("Bot engine mode is {EngineMode}", internalEngineConfig.EngineMode);
 
 
         switch (internalEngineConfig.EngineMode)
@@ -80,11 +84,13 @@ public static class ClientExtension
             {
                 if (hostingEnvironment.IsDevelopment())
                 {
+                    logger.LogInformation("Starting bot in Polling mode because of Development environment");
                     services.EnablePollingEngine();
                     internalEngineConfig.ActualEngineMode = BotEngineMode.Polling;
                 }
                 else
                 {
+                    logger.LogInformation("Starting bot in Webhook mode because of non-Development environment");
                     services.EnableWebhookEngine();
                     internalEngineConfig.ActualEngineMode = BotEngineMode.Webhook;
                 }
@@ -103,6 +109,10 @@ public static class ClientExtension
 
     private static IServiceCollection EnablePollingEngine(this IServiceCollection services)
     {
+        using var provider = services.BuildServiceProvider();
+        var logger = provider.GetRequiredService<ILogger<BotPollingEngine>>();
+
+        logger.LogInformation("Enabling Polling engine");
         services.AddSingleton<IBotEngine, BotPollingEngine>();
 
         return services;
@@ -110,6 +120,10 @@ public static class ClientExtension
 
     private static IServiceCollection EnableWebhookEngine(this IServiceCollection services)
     {
+        using var provider = services.BuildServiceProvider();
+        var logger = provider.GetRequiredService<ILogger<BotWebhookEngine>>();
+
+        logger.LogInformation("Enabling Webhook engine");
         services.AddSingleton<IBotEngine, BotWebhookEngine>();
 
         return services;
@@ -127,7 +141,9 @@ public static class ClientExtension
     private static async Task<IApplicationBuilder> StartTelegramBot(this IApplicationBuilder app)
     {
         var botEngine = app.ApplicationServices.GetRequiredService<IBotEngine>();
+        var logger = app.ApplicationServices.GetRequiredService<ILogger<IBotEngine>>();
 
+        logger.LogInformation("Starting bot engine");
         await botEngine.Start();
 
         return app;

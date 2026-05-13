@@ -23,8 +23,8 @@ public class BotUpdateHandler(
 {
     private IEnumerable<Type> BotCommands => GetCommands();
     private List<MethodInfo> BotMethods => GetMethods();
-
-    #region Invocation
+    
+    #region Type Handling
 
     public async Task<object?> HandleUpdate(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
@@ -63,6 +63,7 @@ public class BotUpdateHandler(
     {
         try
         {
+            logger.LogTrace("Finding command for update type: {UpdateType}", update.Type);
             var method = update.Type switch
             {
                 UpdateType.InlineQuery => GetMethod(update.InlineQuery!),
@@ -75,6 +76,8 @@ public class BotUpdateHandler(
                 logger.LogWarning("No handler for {UpdateType} in UpdateId: {UpdateId}", update.Type, update.Id);
                 return null;
             }
+
+            logger.LogTrace("Found command for update type: {UpdateType}", update.Type);
 
             method.Update = update;
             var invokeMethod = await InvokeMethod(botClient, method);
@@ -94,6 +97,7 @@ public class BotUpdateHandler(
         try
         {
             var message = update.Message ?? update.EditedMessage;
+            logger.LogTrace("Finding command for message: {MessageText}", message?.Text);
             var method = GetMethod(message!);
 
             if (method == null)
@@ -101,6 +105,8 @@ public class BotUpdateHandler(
                 logger.LogWarning("No handler for MessageId: {MessageId} in UpdateId: {UpdateId}", message?.MessageId, update.Id);
                 return null;
             }
+
+            logger.LogTrace("Found command for message: {MessageText}", message?.Text);
 
             method.Update = update;
 
@@ -115,6 +121,10 @@ public class BotUpdateHandler(
 
         return null;
     }
+
+    #endregion
+
+    #region Invocation
 
     private async Task<object?> InvokeMethod(ITelegramBotClient client, BotCommandInfo? botCommandInfo)
     {
@@ -140,8 +150,30 @@ public class BotUpdateHandler(
             ];
         }
 
-        #region Before Command Middleware
+        var middlewarePassed = await ExecuteBeforeMiddlewareAsync(commandContext);
+        if (!middlewarePassed)
+        {
+            return null;
+        }
 
+        #region Invoke Command
+
+        var controller = (BotCommandController)ActivatorUtilities.CreateInstance(provider, botCommandInfo.ControllerType);
+        controller.Context = commandContext;
+
+        logger.LogTrace("Invoking command: {Controller}/{Method}", botCommandInfo.ControllerType.Name, botCommandInfo.Method.Name);
+        var invokeResult = await MethodHelper.InvokeMethod(botCommandInfo.Method, paramList, controller);
+        logger.LogDebug("Successfully handled UpdateId: {UpdateId} for {UpdateType} ", botCommandInfo.Update!.Id, botCommandInfo.Update!.Type);
+
+        #endregion
+
+        await ExecuteAfterMiddlewareAsync(commandContext);
+        
+        return invokeResult;
+    }
+
+    private async Task<bool> ExecuteBeforeMiddlewareAsync(CommandContext commandContext)
+    {
         var beforeCommands = provider.GetServices<IBeforeCommand>()
             .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
             .Where(x => botEngineConfig.DisabledMiddleware?.Contains(x.GetType().Name) == false)
@@ -149,6 +181,7 @@ public class BotUpdateHandler(
 
         var passedMiddlewareCount = 0;
 
+        logger.LogTrace("Found {Count} BeforeMiddlewares", beforeCommands.Count);
         foreach (var command in beforeCommands)
         {
             var middlewareName = command.GetType().Name;
@@ -167,27 +200,20 @@ public class BotUpdateHandler(
         {
             logger.LogDebug("Handler stops because middleware is not passed");
 
-            return null;
+            return false;
         }
 
-        #endregion
+        logger.LogTrace("All BeforeMiddlewares passed");
+        return true;
+    }
 
-        #region Invoke Command
-
-        var controller = (BotCommandController)ActivatorUtilities.CreateInstance(provider, botCommandInfo.ControllerType);
-        controller.Context = commandContext;
-
-        var invokeResult = await MethodHelper.InvokeMethod(botCommandInfo.Method, paramList, controller);
-        logger.LogDebug("Successfully handled UpdateId: {UpdateId} for {UpdateType} ", botCommandInfo.Update!.Id, botCommandInfo.Update!.Type);
-
-        #endregion
-
-        #region After Command Middleware
-
+    private async Task ExecuteAfterMiddlewareAsync(CommandContext commandContext)
+    {
         var afterCommands = provider.GetServices<IAfterCommand>()
             .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
             .ToList();
 
+        logger.LogTrace("Found {Count} AfterMiddlewares", afterCommands.Count);
         foreach (var command in afterCommands)
         {
             var middlewareName = command.GetType().Name;
@@ -196,14 +222,10 @@ public class BotUpdateHandler(
             await command.ExecuteAsync(commandContext);
             logger.LogDebug("AfterMiddleware - Complete: {Middleware}", middlewareName);
         }
-
-        #endregion
-
-        return invokeResult;
     }
 
     #endregion
-
+    
     #region Command
 
     private BotCommandInfo? GetMethod(Update update)

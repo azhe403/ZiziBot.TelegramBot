@@ -4,7 +4,7 @@ using ZiziBot.TelegramBot.Framework.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSerilog(x => x
-    .MinimumLevel.Debug()
+    .MinimumLevel.Verbose()
     .WriteTo.Console());
 
 builder.Services.AddZiziBotTelegramBot();
