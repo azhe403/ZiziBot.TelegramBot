@@ -27,7 +27,7 @@ jobs:
           $major = $date.Year - 2000 + 200
           $minor = $date.Month
           $build = (New-TimeSpan -Start (Get-Date -Year 2000 -Month 1 -Day 1) -End $date).Days
-          $revision = "{0:D5}" -f [int]($date.TimeOfDay.TotalSeconds)
+          $revision = "{0:D5}" -f [int]($date.TimeOfDay.TotalSeconds/2)
           $version = "$major.$minor.$build.$revision"
           if ('${{ github.ref }}' -notlike 'refs/tags/v*') {
             $version = "$version-beta"

@@ -6,11 +6,20 @@
 
 **ZiziBot.TelegramBot** is a bot framework designed to help with command-based bot development. Some samples can be found in the **Sample** project.
 
-This framework supports both Polling and Webhook modes in AutoMode, which is enabled by default. This means that during local development, it runs using Polling, and after deployment, it automatically switches to Webhook mode. Simply fill in the required configuration in `appsettings.json` to get started.
+This framework supports both Polling and Webhook modes. 
+You can specify the mode in `appsettings.json` using the `EngineMode` property.
+
+### Auto Mode
+By default, `EngineMode` is set to `Auto`. 
+This means that during local development, it runs using Polling, and after deployment, it automatically switches to Webhook mode. 
+Simply fill in the required configuration in `appsettings.json` to get started.
 
 Please note that this is a very early-stage project, so there are no guarantees against breaking changes in the future.
 
 This project is inspired by [VodemSharp/Allowed.Telegram.Bot](https://github.com/VodemSharp/Allowed.Telegram.Bot).
+
+## Framework Architecture
+All bot commands are inherited from the `BotCommandController` class. This class provides a `Context` property that allows you to access the current request and send a response. To better understand how to create a command, please refer to the sample project.
 
 ## Demo project
 
