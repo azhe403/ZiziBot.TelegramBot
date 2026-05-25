@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
@@ -23,7 +24,7 @@ public class BotUpdateHandler(
 {
     private IEnumerable<Type> BotCommands => GetCommands();
     private List<MethodInfo> BotMethods => GetMethods();
-    
+
     #region Type Handling
 
     public async Task<object?> HandleUpdate(ITelegramBotClient botClient, Update update, CancellationToken token)
@@ -156,19 +157,32 @@ public class BotUpdateHandler(
             return null;
         }
 
+        var invokeResult = await InvokeCommand(botCommandInfo, commandContext, paramList);
+
+        await ExecuteAfterMiddlewareAsync(commandContext);
+
+        return invokeResult;
+    }
+
+    private async Task<object?> InvokeCommand(BotCommandInfo botCommandInfo, CommandContext commandContext, List<object> paramList)
+    {
         #region Invoke Command
 
+        var sw = Stopwatch.StartNew();
         var controller = (BotCommandController)ActivatorUtilities.CreateInstance(provider, botCommandInfo.ControllerType);
         controller.Context = commandContext;
 
-        logger.LogTrace("Invoking command: {Controller}/{Method}", botCommandInfo.ControllerType.Name, botCommandInfo.Method.Name);
+        logger.LogTrace("Executing handler - Session: {SessionId} - Route: {Controller}.{Method} - UpdateId: {UpdateId} for {UpdateType}",
+            commandContext.SessionId, botCommandInfo.ControllerType.Name, botCommandInfo.Method.Name, botCommandInfo.Update!.Id, botCommandInfo.Update!.Type);
+
         var invokeResult = await MethodHelper.InvokeMethod(botCommandInfo.Method, paramList, controller);
-        logger.LogDebug("Successfully handled UpdateId: {UpdateId} for {UpdateType} ", botCommandInfo.Update!.Id, botCommandInfo.Update!.Type);
+
+        sw.Stop();
+        logger.LogDebug("Complete handler - Session: {SessionId} - Route: {Controller}.{Method} - UpdateId: {UpdateId} for {UpdateType} - Elapsed: {ElapsedMilliseconds}",
+            commandContext.SessionId, botCommandInfo.ControllerType.Name, botCommandInfo.Method.Name, botCommandInfo.Update!.Id, botCommandInfo.Update!.Type, sw.Elapsed);
 
         #endregion
 
-        await ExecuteAfterMiddlewareAsync(commandContext);
-        
         return invokeResult;
     }
 
@@ -181,29 +195,29 @@ public class BotUpdateHandler(
 
         var passedMiddlewareCount = 0;
 
-        logger.LogTrace("Found {Count} BeforeMiddlewares", beforeCommands.Count);
+        logger.LogTrace("BeforeMiddleware - session: {SessionId} - Found {Count} Middlewares", commandContext.SessionId, beforeCommands.Count);
         foreach (var command in beforeCommands)
         {
             var middlewareName = command.GetType().Name;
 
-            logger.LogDebug("BeforeMiddleware - Invoking: {Middleware}", middlewareName);
+            logger.LogDebug("BeforeMiddleware - session: {SessionId} - Invoking: {Middleware}", commandContext.SessionId, middlewareName);
             await command.ExecuteAsync(commandContext, data =>
             {
                 passedMiddlewareCount += 1;
                 return Task.CompletedTask;
             });
 
-            logger.LogDebug("BeforeMiddleware - Complete: {Middleware}", middlewareName);
+            logger.LogDebug("BeforeMiddleware - session: {SessionId} - Complete: {Middleware}", commandContext.SessionId, middlewareName);
         }
 
         if (beforeCommands.Count != passedMiddlewareCount)
         {
-            logger.LogDebug("Handler stops because middleware is not passed");
+            logger.LogDebug("BeforeMiddleware - session: {SessionId} - Handler stops because middleware is not passed", commandContext.SessionId);
 
             return false;
         }
 
-        logger.LogTrace("All BeforeMiddlewares passed");
+        logger.LogTrace("BeforeMiddleware - session: {SessionId} - All BeforeMiddlewares passed", commandContext.SessionId);
         return true;
     }
 
@@ -213,19 +227,19 @@ public class BotUpdateHandler(
             .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
             .ToList();
 
-        logger.LogTrace("Found {Count} AfterMiddlewares", afterCommands.Count);
+        logger.LogTrace("AfterMiddleware - session: {SessionId} - Found {Count} Middlewares", commandContext.SessionId, afterCommands.Count);
         foreach (var command in afterCommands)
         {
             var middlewareName = command.GetType().Name;
 
-            logger.LogDebug("AfterMiddleware - Invoking: {Middleware}", middlewareName);
+            logger.LogDebug("AfterMiddleware - session: {SessionId} - Invoking: {Middleware}", commandContext.SessionId, middlewareName);
             await command.ExecuteAsync(commandContext);
-            logger.LogDebug("AfterMiddleware - Complete: {Middleware}", middlewareName);
+            logger.LogDebug("AfterMiddleware - session: {SessionId} - Complete: {Middleware}", commandContext.SessionId, middlewareName);
         }
     }
 
     #endregion
-    
+
     #region Command
 
     private BotCommandInfo? GetMethod(Update update)

@@ -1,15 +1,12 @@
-﻿using System.Threading.Tasks;
-using Telegram.Bot.Types;
+﻿using Telegram.Bot.Types;
 using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace ZiziBot.TelegramBot.Framework.Models;
 
-using Telegram.Bot.Types.ReplyMarkups;
-
 public class BotCommandController
 {
-    public CommandContext Context { get; set; } = null!;
+    public CommandContext Context { get; internal set; } = null!;
 
     public virtual void Initialize(long telegramId)
     {
