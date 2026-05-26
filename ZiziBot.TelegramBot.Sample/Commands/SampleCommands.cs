@@ -4,7 +4,7 @@ using ZiziBot.TelegramBot.Framework.Models;
 
 namespace ZiziBot.TelegramBot.Sample.Commands;
 
-public class SampleCommands : BotCommandController
+public class SampleCommands(CommandContext context) : BotCommandController
 {
     [Command("ping")]
     [TextCommand("ping")]
@@ -12,13 +12,16 @@ public class SampleCommands : BotCommandController
     {
         var replyMarkup = new InlineKeyboardMarkup([
             [
-                new InlineKeyboardButton("Ping") {
+                new InlineKeyboardButton("Ping")
+                {
                     CallbackData = "ping"
                 },
-                new InlineKeyboardButton("Foo Bar") {
+                new InlineKeyboardButton("Foo Bar")
+                {
                     CallbackData = "foo bar"
                 },
-                new InlineKeyboardButton("lorem ipsum") {
+                new InlineKeyboardButton("lorem ipsum")
+                {
                     CallbackData = "lorem ipsum dolor sit amet"
                 }
             ]

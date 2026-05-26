@@ -103,6 +103,7 @@ public static class ClientExtension
         services.AddSingleton<BotEngineHandler>();
         services.AddSingleton<BotClientCollection>();
         services.AddScoped<BotUpdateHandler>();
+        services.AddScoped<CommandContext>();
 
         return services;
     }

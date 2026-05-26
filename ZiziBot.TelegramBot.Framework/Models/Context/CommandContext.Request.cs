@@ -28,7 +28,8 @@ public partial class CommandContext
         ArgumentNullException.ThrowIfNull(Chat);
         ArgumentException.ThrowIfNullOrEmpty(text);
 
-        replyParameters ??= new ReplyParameters() {
+        replyParameters ??= new ReplyParameters()
+        {
             AllowSendingWithoutReply = true
         };
 

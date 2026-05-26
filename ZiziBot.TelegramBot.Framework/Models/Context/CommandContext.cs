@@ -8,10 +8,10 @@ namespace ZiziBot.TelegramBot.Framework.Models;
 
 public partial class CommandContext
 {
-    public string? BotToken { get; init; }
-    public ITelegramBotClient? BotClient { get; set; }
-    public Update? Update { get; set; }
-    public BotEngineConfig? EngineConfig { get; set; }
+    public string? BotToken { get; internal set; }
+    public ITelegramBotClient? BotClient { get; internal set; }
+    public Update? Update { get; internal set; }
+    public BotEngineConfig? EngineConfig { get; internal set; }
 
     #region Join Request
 

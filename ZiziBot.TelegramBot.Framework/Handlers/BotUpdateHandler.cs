@@ -20,11 +20,10 @@ public class BotUpdateHandler(
     ILogger<BotUpdateHandler> logger,
     BotCommandCollection commandCollection,
     BotClientCollection botClientCollection,
-    BotEngineConfig botEngineConfig
+    BotEngineConfig botEngineConfig,
+    CommandContext commandContext
 )
 {
-    private CommandContext _commandContext = new();
-
     private IEnumerable<Type> BotCommands => GetCommands();
     private List<MethodInfo> BotMethods => GetMethods();
 
@@ -34,12 +33,12 @@ public class BotUpdateHandler(
     {
         try
         {
-            _commandContext.BotClient = botClient;
-            _commandContext.Update = update;
-            _commandContext.EngineConfig = botEngineConfig;
-            
+            commandContext.BotClient = botClient;
+            commandContext.Update = update;
+            commandContext.EngineConfig = botEngineConfig;
+
             logger.LogDebug("Session: {SessionId} - Receiving update. UpdateId: {Id}, UpdateType: {Type}, ExecutionMode: {ExecutionMode}, EngineMode: {ActualEngineMode}",
-                _commandContext.SessionId, update.Id, update.Type, botEngineConfig.ExecutionMode, botEngineConfig.ActualEngineMode);   
+                commandContext.SessionId, update.Id, update.Type, botEngineConfig.ExecutionMode, botEngineConfig.ActualEngineMode);
 
             var result = update.Type switch
             {
@@ -54,7 +53,7 @@ public class BotUpdateHandler(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Session: {SessionId} - Error handling update.", _commandContext.SessionId);
+            logger.LogError(e, "Session: {SessionId} - Error handling update.", commandContext.SessionId);
             throw;
         }
     }
@@ -63,28 +62,28 @@ public class BotUpdateHandler(
     {
         try
         {
-            ArgumentNullException.ThrowIfNull(_commandContext.BotClient);
-            ArgumentNullException.ThrowIfNull(_commandContext.EngineConfig);
+            ArgumentNullException.ThrowIfNull(commandContext.BotClient);
+            ArgumentNullException.ThrowIfNull(commandContext.EngineConfig);
 
             const int limitWarning = 5;
 
-            if (_commandContext.EngineConfig.ActualEngineMode == BotEngineMode.Polling)
+            if (commandContext.EngineConfig.ActualEngineMode == BotEngineMode.Polling)
             {
-                var updates = await _commandContext.BotClient.GetUpdates(cancellationToken: token);
+                var updates = await commandContext.BotClient.GetUpdates(cancellationToken: token);
                 var updatesLength = updates.Length;
                 var logLevel = updatesLength > limitWarning ? LogLevel.Warning : LogLevel.Debug;
-                logger.Log(logLevel, "Session: {SessionId} - Polling Mode - GetUpdates Count: {PendingCount}", _commandContext.SessionId, updatesLength);
+                logger.Log(logLevel, "Session: {SessionId} - Polling Mode - GetUpdates Count: {PendingCount}", commandContext.SessionId, updatesLength);
             }
             else
             {
-                var webhookInfo = await _commandContext.BotClient.GetWebhookInfo(cancellationToken: token);
+                var webhookInfo = await commandContext.BotClient.GetWebhookInfo(cancellationToken: token);
                 var logLevel = webhookInfo.PendingUpdateCount > limitWarning ? LogLevel.Warning : LogLevel.Debug;
-                logger.Log(logLevel, "Session: {SessionId} - Webhook Mode - Pending Updates Count: {PendingCount}", _commandContext.SessionId, webhookInfo.PendingUpdateCount);
+                logger.Log(logLevel, "Session: {SessionId} - Webhook Mode - Pending Updates Count: {PendingCount}", commandContext.SessionId, webhookInfo.PendingUpdateCount);
             }
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Session: {SessionId} - Error tracking update.", _commandContext.SessionId);
+            logger.LogError(e, "Session: {SessionId} - Error tracking update.", commandContext.SessionId);
             throw;
         }
     }
@@ -93,33 +92,34 @@ public class BotUpdateHandler(
     {
         try
         {
-            ArgumentNullException.ThrowIfNull(_commandContext.Update);
-            ArgumentNullException.ThrowIfNull(_commandContext.BotClient);
+            ArgumentNullException.ThrowIfNull(commandContext.Update);
+            ArgumentNullException.ThrowIfNull(commandContext.BotClient);
 
-            logger.LogTrace("Session: {SessionId} - Finding command for update type: {UpdateType}", _commandContext.SessionId, _commandContext.Update.Type);
-            var method = _commandContext.Update.Type switch
+            logger.LogTrace("Session: {SessionId} - Finding command for update type: {UpdateType}", commandContext.SessionId, commandContext.Update.Type);
+            var method = commandContext.Update.Type switch
             {
-                UpdateType.InlineQuery => GetMethod(_commandContext.Update.InlineQuery!),
-                UpdateType.CallbackQuery => GetMethod(_commandContext.Update.CallbackQuery!),
-                _ => GetMethod(_commandContext.Update)
+                UpdateType.InlineQuery => GetMethod(commandContext.Update.InlineQuery!),
+                UpdateType.CallbackQuery => GetMethod(commandContext.Update.CallbackQuery!),
+                _ => GetMethod(commandContext.Update)
             };
 
             if (method == null)
             {
-                logger.LogWarning("Session: {SessionId} - No handler for {UpdateType} in UpdateId: {UpdateId}", _commandContext.SessionId, _commandContext.Update.Type, _commandContext.Update.Id);
+                logger.LogWarning("Session: {SessionId} - No handler for {UpdateType} in UpdateId: {UpdateId}", commandContext.SessionId, commandContext.Update.Type,
+                    commandContext.Update.Id);
                 return null;
             }
 
-            logger.LogTrace("Session: {SessionId} - Found command for update type: {UpdateType}", _commandContext.SessionId, _commandContext.Update.Type);
+            logger.LogTrace("Session: {SessionId} - Found command for update type: {UpdateType}", commandContext.SessionId, commandContext.Update.Type);
 
-            method.Update = _commandContext.Update;
+            method.Update = commandContext.Update;
             var invokeMethod = await InvokeMethod(method);
 
             return invokeMethod;
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "Session: {SessionId} - Error on update handler.", _commandContext.SessionId);
+            logger.LogError(exception, "Session: {SessionId} - Error on update handler.", commandContext.SessionId);
         }
 
         return null;
@@ -129,22 +129,23 @@ public class BotUpdateHandler(
     {
         try
         {
-            ArgumentNullException.ThrowIfNull(_commandContext.Update);
-            ArgumentNullException.ThrowIfNull(_commandContext.BotClient);
+            ArgumentNullException.ThrowIfNull(commandContext.Update);
+            ArgumentNullException.ThrowIfNull(commandContext.BotClient);
 
-            var message = _commandContext.Update.Message ?? _commandContext.Update.EditedMessage;
-            logger.LogTrace("Session: {SessionId} - Finding command for message: {MessageText}", _commandContext.SessionId, message?.Text);
+            var message = commandContext.Update.Message ?? commandContext.Update.EditedMessage;
+            logger.LogTrace("Session: {SessionId} - Finding command for message: {MessageText}", commandContext.SessionId, message?.Text);
             var method = GetMethod(message!);
 
             if (method == null)
             {
-                logger.LogWarning("Session: {SessionId} - No handler for MessageId: {MessageId} in UpdateId: {UpdateId}", _commandContext.SessionId, message?.MessageId, _commandContext.Update.Id);
+                logger.LogWarning("Session: {SessionId} - No handler for MessageId: {MessageId} in UpdateId: {UpdateId}", commandContext.SessionId, message?.MessageId,
+                    commandContext.Update.Id);
                 return null;
             }
 
-            logger.LogTrace("Session: {SessionId} - Found command for message: {MessageText}", _commandContext.SessionId, message?.Text);
+            logger.LogTrace("Session: {SessionId} - Found command for message: {MessageText}", commandContext.SessionId, message?.Text);
 
-            method.Update = _commandContext.Update;
+            method.Update = commandContext.Update;
 
             var invokeMethod = await InvokeMethod(method);
 
@@ -152,7 +153,7 @@ public class BotUpdateHandler(
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "Session: {SessionId} - Error on message handler.", _commandContext.SessionId);
+            logger.LogError(exception, "Session: {SessionId} - Error on message handler.", commandContext.SessionId);
         }
 
         return null;
@@ -171,19 +172,19 @@ public class BotUpdateHandler(
             List<object> paramList = [];
             var methodParams = botCommandInfo.Method.GetParameters();
 
-            _commandContext = new CommandContext()
+            commandContext.SetContext(new CommandContext()
             {
-                BotToken = botClientCollection.Items.First(x => x.Client == _commandContext.BotClient).BotToken,
-                BotClient = _commandContext.BotClient,
+                BotToken = botClientCollection.Items.First(x => x.Client == commandContext.BotClient).BotToken,
+                BotClient = commandContext.BotClient,
                 EngineConfig = botEngineConfig,
                 Update = botCommandInfo.Update!
-            };
+            });
 
             if (methodParams.Any(x => x.ParameterType == typeof(CommandContext)))
             {
                 paramList =
                 [
-                    _commandContext
+                    commandContext
                 ];
             }
 
@@ -201,7 +202,7 @@ public class BotUpdateHandler(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Session: {SessionId} - Error on update invocation.", _commandContext.SessionId);
+            logger.LogError(e, "Session: {SessionId} - Error on update invocation.", commandContext.SessionId);
             throw;
         }
     }
@@ -212,22 +213,22 @@ public class BotUpdateHandler(
         {
             var sw = Stopwatch.StartNew();
             var controller = (BotCommandController)ActivatorUtilities.CreateInstance(provider, botCommandInfo.ControllerType);
-            controller.Context = _commandContext;
+            controller.Context = commandContext;
 
             logger.LogTrace("Session: {SessionId} - Route: {Controller}.{Method} - UpdateId: {UpdateId} for {UpdateType}",
-                _commandContext.SessionId, botCommandInfo.ControllerType.Name, botCommandInfo.Method.Name, botCommandInfo.Update!.Id, botCommandInfo.Update!.Type);
+                commandContext.SessionId, botCommandInfo.ControllerType.Name, botCommandInfo.Method.Name, botCommandInfo.Update!.Id, botCommandInfo.Update!.Type);
 
             var invokeResult = await MethodHelper.InvokeMethod(botCommandInfo.Method, paramList, controller);
 
             sw.Stop();
             logger.LogDebug("Session: {SessionId} - Route: {Controller}.{Method} - UpdateId: {UpdateId} for {UpdateType} - Elapsed: {ElapsedMilliseconds}",
-                _commandContext.SessionId, botCommandInfo.ControllerType.Name, botCommandInfo.Method.Name, botCommandInfo.Update!.Id, botCommandInfo.Update!.Type, sw.Elapsed);
+                commandContext.SessionId, botCommandInfo.ControllerType.Name, botCommandInfo.Method.Name, botCommandInfo.Update!.Id, botCommandInfo.Update!.Type, sw.Elapsed);
 
             return invokeResult;
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Session: {SessionId} - Error on command invocation.", _commandContext.SessionId);
+            logger.LogError(e, "Session: {SessionId} - Error on command invocation.", commandContext.SessionId);
             throw;
         }
     }
@@ -243,34 +244,34 @@ public class BotUpdateHandler(
 
             var passedMiddlewareCount = 0;
 
-            logger.LogTrace("Session: {SessionId} - BeforeMiddleware Found {Count} Middlewares", _commandContext.SessionId, beforeCommands.Count);
+            logger.LogTrace("Session: {SessionId} - BeforeMiddleware Found {Count} Middlewares", commandContext.SessionId, beforeCommands.Count);
             foreach (var command in beforeCommands)
             {
                 var middlewareName = command.GetType().Name;
 
-                logger.LogDebug("Session: {SessionId} - BeforeMiddleware - Invoking: {Middleware}", _commandContext.SessionId, middlewareName);
-                await command.ExecuteAsync(_commandContext, data =>
+                logger.LogDebug("Session: {SessionId} - BeforeMiddleware - Invoking: {Middleware}", commandContext.SessionId, middlewareName);
+                await command.ExecuteAsync(commandContext, data =>
                 {
                     passedMiddlewareCount += 1;
                     return Task.CompletedTask;
                 });
 
-                logger.LogDebug("Session: {SessionId} - BeforeMiddleware - Complete: {Middleware}", _commandContext.SessionId, middlewareName);
+                logger.LogDebug("Session: {SessionId} - BeforeMiddleware - Complete: {Middleware}", commandContext.SessionId, middlewareName);
             }
 
             if (beforeCommands.Count != passedMiddlewareCount)
             {
-                logger.LogDebug("Session: {SessionId} - BeforeMiddleware - Handler stops because middleware is not passed", _commandContext.SessionId);
+                logger.LogDebug("Session: {SessionId} - BeforeMiddleware - Handler stops because middleware is not passed", commandContext.SessionId);
 
                 return false;
             }
 
-            logger.LogTrace("Session: {SessionId} - BeforeMiddleware - All BeforeMiddlewares passed", _commandContext.SessionId);
+            logger.LogTrace("Session: {SessionId} - BeforeMiddleware - All BeforeMiddlewares passed", commandContext.SessionId);
             return true;
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Session: {SessionId} - Error on BeforeMiddleware invocation.", _commandContext.SessionId);
+            logger.LogError(e, "Session: {SessionId} - Error on BeforeMiddleware invocation.", commandContext.SessionId);
             throw;
         }
     }
@@ -283,19 +284,19 @@ public class BotUpdateHandler(
                 .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
                 .ToList();
 
-            logger.LogTrace("Session: {SessionId} - AfterMiddleware Found {Count} Middlewares", _commandContext.SessionId, afterCommands.Count);
+            logger.LogTrace("Session: {SessionId} - AfterMiddleware Found {Count} Middlewares", commandContext.SessionId, afterCommands.Count);
             foreach (var command in afterCommands)
             {
                 var middlewareName = command.GetType().Name;
 
-                logger.LogDebug("Session: {SessionId} - AfterMiddleware - Invoking: {Middleware}", _commandContext.SessionId, middlewareName);
-                await command.ExecuteAsync(_commandContext);
-                logger.LogDebug("Session: {SessionId} - AfterMiddleware - Complete: {Middleware}", _commandContext.SessionId, middlewareName);
+                logger.LogDebug("Session: {SessionId} - AfterMiddleware - Invoking: {Middleware}", commandContext.SessionId, middlewareName);
+                await command.ExecuteAsync(commandContext);
+                logger.LogDebug("Session: {SessionId} - AfterMiddleware - Complete: {Middleware}", commandContext.SessionId, middlewareName);
             }
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Session: {SessionId} - Error on AfterMiddleware invocation.", _commandContext.SessionId);
+            logger.LogError(e, "Session: {SessionId} - Error on AfterMiddleware invocation.", commandContext.SessionId);
             throw;
         }
     }
@@ -329,7 +330,7 @@ public class BotUpdateHandler(
 
         if (method == null)
         {
-            logger.LogDebug("Session: {SessionId} - Fallback to default InlineQuery for InlineQueryId: {InlineQueryId}", _commandContext.SessionId, inlineQuery.Id);
+            logger.LogDebug("Session: {SessionId} - Fallback to default InlineQuery for InlineQueryId: {InlineQueryId}", commandContext.SessionId, inlineQuery.Id);
             method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<InlineQueryAttribute>().Any());
         }
 
@@ -353,7 +354,7 @@ public class BotUpdateHandler(
 
         if (method == null)
         {
-            logger.LogDebug("Session: {SessionId} - Fallback to default CallbackQuery for CallbackQuery: {CallbackQueryId}", _commandContext.SessionId, callbackQuery.Id);
+            logger.LogDebug("Session: {SessionId} - Fallback to default CallbackQuery for CallbackQuery: {CallbackQueryId}", commandContext.SessionId, callbackQuery.Id);
             method = BotMethods.Where(x => x.GetCustomAttributes<CallbackAttribute>().Any())
                 .FirstOrDefault(x => string.IsNullOrEmpty(x.GetCustomAttribute<CallbackAttribute>()?.Command));
         }
