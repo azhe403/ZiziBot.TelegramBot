@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -6,6 +6,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using ZiziBot.TelegramBot.Framework.Attributes;
+using ZiziBot.TelegramBot.Framework.Extensions;
 using ZiziBot.TelegramBot.Framework.Helpers;
 using ZiziBot.TelegramBot.Framework.Interfaces;
 using ZiziBot.TelegramBot.Framework.Models;
@@ -22,102 +23,136 @@ public class BotUpdateHandler(
     BotEngineConfig botEngineConfig
 )
 {
+    private CommandContext _commandContext = new();
+
     private IEnumerable<Type> BotCommands => GetCommands();
     private List<MethodInfo> BotMethods => GetMethods();
 
     #region Type Handling
 
-    public async Task<object?> HandleUpdate(ITelegramBotClient botClient, Update update, CancellationToken token)
-    {
-        var result = update.Type switch
-        {
-            UpdateType.Message => await OnMessage(botClient, update),
-            UpdateType.EditedMessage => await OnMessage(botClient, update),
-            _ => await OnUpdate(botClient, update)
-        };
-
-        await TrackUpdate(botClient, token);
-
-        return result;
-    }
-
-    private async Task TrackUpdate(ITelegramBotClient botClient, CancellationToken token)
-    {
-        const int limitWarning = 5;
-
-        if (botEngineConfig.ActualEngineMode == BotEngineMode.Polling)
-        {
-            var updates = await botClient.GetUpdates(cancellationToken: token);
-            var updatesLength = updates.Length;
-            var logLevel = updatesLength > limitWarning ? LogLevel.Warning : LogLevel.Debug;
-            logger.Log(logLevel, "Polling Mode - GetUpdates Count: {PendingCount}", updatesLength);
-        }
-        else
-        {
-            var webhookInfo = await botClient.GetWebhookInfo(cancellationToken: token);
-            var logLevel = webhookInfo.PendingUpdateCount > limitWarning ? LogLevel.Warning : LogLevel.Debug;
-            logger.Log(logLevel, "Webhook Mode - Pending Updates Count: {PendingCount}", webhookInfo.PendingUpdateCount);
-        }
-    }
-
-    private async Task<object?> OnUpdate(ITelegramBotClient botClient, Update update)
+    public async Task<object?> HandleUpdate(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         try
         {
-            logger.LogTrace("Finding command for update type: {UpdateType}", update.Type);
-            var method = update.Type switch
+            _commandContext.BotClient = botClient;
+            _commandContext.Update = update;
+            _commandContext.EngineConfig = botEngineConfig;
+            
+            logger.LogDebug("Session: {SessionId} - Receiving update. UpdateId: {Id}, UpdateType: {Type}, ExecutionMode: {ExecutionMode}, EngineMode: {ActualEngineMode}",
+                _commandContext.SessionId, update.Id, update.Type, botEngineConfig.ExecutionMode, botEngineConfig.ActualEngineMode);   
+
+            var result = update.Type switch
             {
-                UpdateType.InlineQuery => GetMethod(update.InlineQuery!),
-                UpdateType.CallbackQuery => GetMethod(update.CallbackQuery!),
-                _ => GetMethod(update)
+                UpdateType.Message => await OnMessage(),
+                UpdateType.EditedMessage => await OnMessage(),
+                _ => await OnUpdate()
+            };
+
+            TrackUpdate(cancellationToken).FireAndForget(logger);
+
+            return result;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Session: {SessionId} - Error handling update.", _commandContext.SessionId);
+            throw;
+        }
+    }
+
+    private async Task TrackUpdate(CancellationToken token)
+    {
+        try
+        {
+            ArgumentNullException.ThrowIfNull(_commandContext.BotClient);
+            ArgumentNullException.ThrowIfNull(_commandContext.EngineConfig);
+
+            const int limitWarning = 5;
+
+            if (_commandContext.EngineConfig.ActualEngineMode == BotEngineMode.Polling)
+            {
+                var updates = await _commandContext.BotClient.GetUpdates(cancellationToken: token);
+                var updatesLength = updates.Length;
+                var logLevel = updatesLength > limitWarning ? LogLevel.Warning : LogLevel.Debug;
+                logger.Log(logLevel, "Session: {SessionId} - Polling Mode - GetUpdates Count: {PendingCount}", _commandContext.SessionId, updatesLength);
+            }
+            else
+            {
+                var webhookInfo = await _commandContext.BotClient.GetWebhookInfo(cancellationToken: token);
+                var logLevel = webhookInfo.PendingUpdateCount > limitWarning ? LogLevel.Warning : LogLevel.Debug;
+                logger.Log(logLevel, "Session: {SessionId} - Webhook Mode - Pending Updates Count: {PendingCount}", _commandContext.SessionId, webhookInfo.PendingUpdateCount);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Session: {SessionId} - Error tracking update.", _commandContext.SessionId);
+            throw;
+        }
+    }
+
+    private async Task<object?> OnUpdate()
+    {
+        try
+        {
+            ArgumentNullException.ThrowIfNull(_commandContext.Update);
+            ArgumentNullException.ThrowIfNull(_commandContext.BotClient);
+
+            logger.LogTrace("Session: {SessionId} - Finding command for update type: {UpdateType}", _commandContext.SessionId, _commandContext.Update.Type);
+            var method = _commandContext.Update.Type switch
+            {
+                UpdateType.InlineQuery => GetMethod(_commandContext.Update.InlineQuery!),
+                UpdateType.CallbackQuery => GetMethod(_commandContext.Update.CallbackQuery!),
+                _ => GetMethod(_commandContext.Update)
             };
 
             if (method == null)
             {
-                logger.LogWarning("No handler for {UpdateType} in UpdateId: {UpdateId}", update.Type, update.Id);
+                logger.LogWarning("Session: {SessionId} - No handler for {UpdateType} in UpdateId: {UpdateId}", _commandContext.SessionId, _commandContext.Update.Type, _commandContext.Update.Id);
                 return null;
             }
 
-            logger.LogTrace("Found command for update type: {UpdateType}", update.Type);
+            logger.LogTrace("Session: {SessionId} - Found command for update type: {UpdateType}", _commandContext.SessionId, _commandContext.Update.Type);
 
-            method.Update = update;
-            var invokeMethod = await InvokeMethod(botClient, method);
+            method.Update = _commandContext.Update;
+            var invokeMethod = await InvokeMethod(method);
 
             return invokeMethod;
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "Error on message handler");
+            logger.LogError(exception, "Session: {SessionId} - Error on update handler.", _commandContext.SessionId);
         }
 
         return null;
     }
 
-    private async Task<object?> OnMessage(ITelegramBotClient botClient, Update update)
+    private async Task<object?> OnMessage()
     {
         try
         {
-            var message = update.Message ?? update.EditedMessage;
-            logger.LogTrace("Finding command for message: {MessageText}", message?.Text);
+            ArgumentNullException.ThrowIfNull(_commandContext.Update);
+            ArgumentNullException.ThrowIfNull(_commandContext.BotClient);
+
+            var message = _commandContext.Update.Message ?? _commandContext.Update.EditedMessage;
+            logger.LogTrace("Session: {SessionId} - Finding command for message: {MessageText}", _commandContext.SessionId, message?.Text);
             var method = GetMethod(message!);
 
             if (method == null)
             {
-                logger.LogWarning("No handler for MessageId: {MessageId} in UpdateId: {UpdateId}", message?.MessageId, update.Id);
+                logger.LogWarning("Session: {SessionId} - No handler for MessageId: {MessageId} in UpdateId: {UpdateId}", _commandContext.SessionId, message?.MessageId, _commandContext.Update.Id);
                 return null;
             }
 
-            logger.LogTrace("Found command for message: {MessageText}", message?.Text);
+            logger.LogTrace("Session: {SessionId} - Found command for message: {MessageText}", _commandContext.SessionId, message?.Text);
 
-            method.Update = update;
+            method.Update = _commandContext.Update;
 
-            var invokeMethod = await InvokeMethod(botClient, method);
+            var invokeMethod = await InvokeMethod(method);
 
             return invokeMethod;
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "Error on message handler");
+            logger.LogError(exception, "Session: {SessionId} - Error on message handler.", _commandContext.SessionId);
         }
 
         return null;
@@ -127,114 +162,141 @@ public class BotUpdateHandler(
 
     #region Invocation
 
-    private async Task<object?> InvokeMethod(ITelegramBotClient client, BotCommandInfo? botCommandInfo)
+    private async Task<object?> InvokeMethod(BotCommandInfo? botCommandInfo)
     {
-        if (botCommandInfo is null)
-            return null;
-
-        List<object> paramList = [];
-        var methodParams = botCommandInfo.Method.GetParameters();
-
-        var commandContext = new CommandContext()
+        try
         {
-            BotToken = botClientCollection.Items.First(x => x.Client == client).BotToken,
-            BotClient = client,
-            EngineConfig = botEngineConfig,
-            Update = botCommandInfo.Update!
-        };
+            ArgumentNullException.ThrowIfNull(botCommandInfo);
 
-        if (methodParams.Any(x => x.ParameterType == typeof(CommandContext)))
-        {
-            paramList =
-            [
-                commandContext
-            ];
-        }
+            List<object> paramList = [];
+            var methodParams = botCommandInfo.Method.GetParameters();
 
-        var middlewarePassed = await ExecuteBeforeMiddlewareAsync(commandContext);
-        if (!middlewarePassed)
-        {
-            return null;
-        }
-
-        var invokeResult = await InvokeCommand(botCommandInfo, commandContext, paramList);
-
-        await ExecuteAfterMiddlewareAsync(commandContext);
-
-        return invokeResult;
-    }
-
-    private async Task<object?> InvokeCommand(BotCommandInfo botCommandInfo, CommandContext commandContext, List<object> paramList)
-    {
-        #region Invoke Command
-
-        var sw = Stopwatch.StartNew();
-        var controller = (BotCommandController)ActivatorUtilities.CreateInstance(provider, botCommandInfo.ControllerType);
-        controller.Context = commandContext;
-
-        logger.LogTrace("Executing handler - Session: {SessionId} - Route: {Controller}.{Method} - UpdateId: {UpdateId} for {UpdateType}",
-            commandContext.SessionId, botCommandInfo.ControllerType.Name, botCommandInfo.Method.Name, botCommandInfo.Update!.Id, botCommandInfo.Update!.Type);
-
-        var invokeResult = await MethodHelper.InvokeMethod(botCommandInfo.Method, paramList, controller);
-
-        sw.Stop();
-        logger.LogDebug("Complete handler - Session: {SessionId} - Route: {Controller}.{Method} - UpdateId: {UpdateId} for {UpdateType} - Elapsed: {ElapsedMilliseconds}",
-            commandContext.SessionId, botCommandInfo.ControllerType.Name, botCommandInfo.Method.Name, botCommandInfo.Update!.Id, botCommandInfo.Update!.Type, sw.Elapsed);
-
-        #endregion
-
-        return invokeResult;
-    }
-
-    private async Task<bool> ExecuteBeforeMiddlewareAsync(CommandContext commandContext)
-    {
-        var beforeCommands = provider.GetServices<IBeforeCommand>()
-            .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
-            .Where(x => botEngineConfig.DisabledMiddleware?.Contains(x.GetType().Name) == false)
-            .ToList();
-
-        var passedMiddlewareCount = 0;
-
-        logger.LogTrace("BeforeMiddleware - session: {SessionId} - Found {Count} Middlewares", commandContext.SessionId, beforeCommands.Count);
-        foreach (var command in beforeCommands)
-        {
-            var middlewareName = command.GetType().Name;
-
-            logger.LogDebug("BeforeMiddleware - session: {SessionId} - Invoking: {Middleware}", commandContext.SessionId, middlewareName);
-            await command.ExecuteAsync(commandContext, data =>
+            _commandContext = new CommandContext()
             {
-                passedMiddlewareCount += 1;
-                return Task.CompletedTask;
-            });
+                BotToken = botClientCollection.Items.First(x => x.Client == _commandContext.BotClient).BotToken,
+                BotClient = _commandContext.BotClient,
+                EngineConfig = botEngineConfig,
+                Update = botCommandInfo.Update!
+            };
 
-            logger.LogDebug("BeforeMiddleware - session: {SessionId} - Complete: {Middleware}", commandContext.SessionId, middlewareName);
+            if (methodParams.Any(x => x.ParameterType == typeof(CommandContext)))
+            {
+                paramList =
+                [
+                    _commandContext
+                ];
+            }
+
+            var middlewarePassed = await ExecuteBeforeMiddlewareAsync();
+            if (!middlewarePassed)
+            {
+                return null;
+            }
+
+            var invokeResult = await InvokeCommand(botCommandInfo, paramList);
+
+            await ExecuteAfterMiddlewareAsync();
+
+            return invokeResult;
         }
-
-        if (beforeCommands.Count != passedMiddlewareCount)
+        catch (Exception e)
         {
-            logger.LogDebug("BeforeMiddleware - session: {SessionId} - Handler stops because middleware is not passed", commandContext.SessionId);
-
-            return false;
+            logger.LogError(e, "Session: {SessionId} - Error on update invocation.", _commandContext.SessionId);
+            throw;
         }
-
-        logger.LogTrace("BeforeMiddleware - session: {SessionId} - All BeforeMiddlewares passed", commandContext.SessionId);
-        return true;
     }
 
-    private async Task ExecuteAfterMiddlewareAsync(CommandContext commandContext)
+    private async Task<object?> InvokeCommand(BotCommandInfo botCommandInfo, List<object> paramList)
     {
-        var afterCommands = provider.GetServices<IAfterCommand>()
-            .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
-            .ToList();
-
-        logger.LogTrace("AfterMiddleware - session: {SessionId} - Found {Count} Middlewares", commandContext.SessionId, afterCommands.Count);
-        foreach (var command in afterCommands)
+        try
         {
-            var middlewareName = command.GetType().Name;
+            var sw = Stopwatch.StartNew();
+            var controller = (BotCommandController)ActivatorUtilities.CreateInstance(provider, botCommandInfo.ControllerType);
+            controller.Context = _commandContext;
 
-            logger.LogDebug("AfterMiddleware - session: {SessionId} - Invoking: {Middleware}", commandContext.SessionId, middlewareName);
-            await command.ExecuteAsync(commandContext);
-            logger.LogDebug("AfterMiddleware - session: {SessionId} - Complete: {Middleware}", commandContext.SessionId, middlewareName);
+            logger.LogTrace("Session: {SessionId} - Route: {Controller}.{Method} - UpdateId: {UpdateId} for {UpdateType}",
+                _commandContext.SessionId, botCommandInfo.ControllerType.Name, botCommandInfo.Method.Name, botCommandInfo.Update!.Id, botCommandInfo.Update!.Type);
+
+            var invokeResult = await MethodHelper.InvokeMethod(botCommandInfo.Method, paramList, controller);
+
+            sw.Stop();
+            logger.LogDebug("Session: {SessionId} - Route: {Controller}.{Method} - UpdateId: {UpdateId} for {UpdateType} - Elapsed: {ElapsedMilliseconds}",
+                _commandContext.SessionId, botCommandInfo.ControllerType.Name, botCommandInfo.Method.Name, botCommandInfo.Update!.Id, botCommandInfo.Update!.Type, sw.Elapsed);
+
+            return invokeResult;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Session: {SessionId} - Error on command invocation.", _commandContext.SessionId);
+            throw;
+        }
+    }
+
+    private async Task<bool> ExecuteBeforeMiddlewareAsync()
+    {
+        try
+        {
+            var beforeCommands = provider.GetServices<IBeforeCommand>()
+                .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
+                .Where(x => botEngineConfig.DisabledMiddleware?.Contains(x.GetType().Name) == false)
+                .ToList();
+
+            var passedMiddlewareCount = 0;
+
+            logger.LogTrace("Session: {SessionId} - BeforeMiddleware Found {Count} Middlewares", _commandContext.SessionId, beforeCommands.Count);
+            foreach (var command in beforeCommands)
+            {
+                var middlewareName = command.GetType().Name;
+
+                logger.LogDebug("Session: {SessionId} - BeforeMiddleware - Invoking: {Middleware}", _commandContext.SessionId, middlewareName);
+                await command.ExecuteAsync(_commandContext, data =>
+                {
+                    passedMiddlewareCount += 1;
+                    return Task.CompletedTask;
+                });
+
+                logger.LogDebug("Session: {SessionId} - BeforeMiddleware - Complete: {Middleware}", _commandContext.SessionId, middlewareName);
+            }
+
+            if (beforeCommands.Count != passedMiddlewareCount)
+            {
+                logger.LogDebug("Session: {SessionId} - BeforeMiddleware - Handler stops because middleware is not passed", _commandContext.SessionId);
+
+                return false;
+            }
+
+            logger.LogTrace("Session: {SessionId} - BeforeMiddleware - All BeforeMiddlewares passed", _commandContext.SessionId);
+            return true;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Session: {SessionId} - Error on BeforeMiddleware invocation.", _commandContext.SessionId);
+            throw;
+        }
+    }
+
+    private async Task ExecuteAfterMiddlewareAsync()
+    {
+        try
+        {
+            var afterCommands = provider.GetServices<IAfterCommand>()
+                .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
+                .ToList();
+
+            logger.LogTrace("Session: {SessionId} - AfterMiddleware Found {Count} Middlewares", _commandContext.SessionId, afterCommands.Count);
+            foreach (var command in afterCommands)
+            {
+                var middlewareName = command.GetType().Name;
+
+                logger.LogDebug("Session: {SessionId} - AfterMiddleware - Invoking: {Middleware}", _commandContext.SessionId, middlewareName);
+                await command.ExecuteAsync(_commandContext);
+                logger.LogDebug("Session: {SessionId} - AfterMiddleware - Complete: {Middleware}", _commandContext.SessionId, middlewareName);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Session: {SessionId} - Error on AfterMiddleware invocation.", _commandContext.SessionId);
+            throw;
         }
     }
 
@@ -267,7 +329,7 @@ public class BotUpdateHandler(
 
         if (method == null)
         {
-            logger.LogDebug("Fallback to default InlineQuery for InlineQueryId: {InlineQueryId}", inlineQuery.Id);
+            logger.LogDebug("Session: {SessionId} - Fallback to default InlineQuery for InlineQueryId: {InlineQueryId}", _commandContext.SessionId, inlineQuery.Id);
             method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<InlineQueryAttribute>().Any());
         }
 
@@ -291,7 +353,7 @@ public class BotUpdateHandler(
 
         if (method == null)
         {
-            logger.LogDebug("Fallback to default CallbackQuery for CallbackQuery: {CallbackQueryId}", callbackQuery.Id);
+            logger.LogDebug("Session: {SessionId} - Fallback to default CallbackQuery for CallbackQuery: {CallbackQueryId}", _commandContext.SessionId, callbackQuery.Id);
             method = BotMethods.Where(x => x.GetCustomAttributes<CallbackAttribute>().Any())
                 .FirstOrDefault(x => string.IsNullOrEmpty(x.GetCustomAttribute<CallbackAttribute>()?.Command));
         }

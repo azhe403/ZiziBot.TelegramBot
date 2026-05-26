@@ -1,26 +1,27 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using UUIDNext;
 using ZiziBot.TelegramBot.Framework.Models.Configs;
 
 namespace ZiziBot.TelegramBot.Framework.Models;
 
 public partial class CommandContext
 {
-    public required string BotToken { get; init; }
-    public required ITelegramBotClient BotClient { get; init; }
-    public required Update Update { get; init; }
-    public required BotEngineConfig EngineConfig { get; set; }
+    public string? BotToken { get; init; }
+    public ITelegramBotClient? BotClient { get; set; }
+    public Update? Update { get; set; }
+    public BotEngineConfig? EngineConfig { get; set; }
 
     #region Join Request
 
-    public ChatJoinRequest? ChatJoinRequest => Update.ChatJoinRequest;
+    public ChatJoinRequest? ChatJoinRequest => Update?.ChatJoinRequest;
 
     #endregion
 
     #region CallbackQuery
 
-    public CallbackQuery? CallbackQuery => Update.CallbackQuery;
+    public CallbackQuery? CallbackQuery => Update?.CallbackQuery;
     public string CallbackQueryId => CallbackQuery?.Id ?? string.Empty;
     public string CallbackQueryData => CallbackQuery?.Data ?? string.Empty;
     public string[] CallbackQueryDatas => CallbackQueryData.Split(" ");
@@ -31,7 +32,7 @@ public partial class CommandContext
 
     #region InlineQuery
 
-    public InlineQuery? InlineQuery => Update.InlineQuery;
+    public InlineQuery? InlineQuery => Update?.InlineQuery;
     public string InlineQueryId => InlineQuery?.Id ?? string.Empty;
     public string InlineQueryQuery => InlineQuery?.Query ?? string.Empty;
     public string InlineQueryQueryCmd => InlineQueryQuery.Split(" ").FirstOrDefault() ?? string.Empty;
@@ -68,7 +69,7 @@ public partial class CommandContext
 
     #region Message
 
-    public Message? Message => Update.Message ?? Update.EditedMessage ?? CallbackQuery?.Message;
+    public Message? Message => Update?.Message ?? Update?.EditedMessage ?? CallbackQuery?.Message;
     public int MessageId => Message?.MessageId ?? default;
     public string? MessageText => Message?.Text ?? Message?.Caption;
     public string[]? MessageTexts => MessageText?.Split(" ");
@@ -85,7 +86,7 @@ public partial class CommandContext
 
     #region Channel Post
 
-    public Message? ChannelPost => Update.ChannelPost ?? Update.EditedChannelPost;
+    public Message? ChannelPost => Update?.ChannelPost ?? Update?.EditedChannelPost;
     public int ChannelPostId => ChannelPost?.MessageId ?? default;
 
     #endregion
@@ -102,7 +103,7 @@ public partial class CommandContext
 
     #region Boolean
 
-    public bool IsChannel => Update.Type is UpdateType.ChannelPost or UpdateType.EditedChannelPost;
+    public bool IsChannel => Update?.Type is UpdateType.ChannelPost or UpdateType.EditedChannelPost;
     public bool IsPublicChat => Chat?.Type is ChatType.Group or ChatType.Supergroup;
     public bool IsPrivateChat => Chat?.Type == ChatType.Private;
     public bool IsSenderChat => Chat?.Type == ChatType.Sender;
@@ -111,7 +112,7 @@ public partial class CommandContext
 
     #region Timestamp
 
-    public string SessionId { get; init; } = Guid.NewGuid().ToString();
+    public string SessionId { get; init; } = Uuid.NewSequential().ToString();
     public DateTime RequestDate { get; init; } = DateTime.UtcNow;
 
     #endregion

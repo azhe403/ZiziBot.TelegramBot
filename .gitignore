@@ -479,3 +479,7 @@ fabric.properties
 # SonarLint working directories, configuration files (including credentials)
 .sonarlint/
 sonarlint/
+
+**/.idea/db-forest-config.xml
+**/.idea/MarsCode*.xml
+**/.idea/sonarlint.xml

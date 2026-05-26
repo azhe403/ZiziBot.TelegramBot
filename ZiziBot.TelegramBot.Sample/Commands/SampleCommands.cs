@@ -42,7 +42,7 @@ public class SampleCommands : BotCommandController
     [DefaultCommand]
     public async Task DefaultCommand()
     {
-        await SendMessage("Default!");
+        await SendMessage("This is a default Command!");
     }
 
     [Callback("ping")]

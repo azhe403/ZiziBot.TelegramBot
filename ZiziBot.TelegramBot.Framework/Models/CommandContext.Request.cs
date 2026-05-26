@@ -32,7 +32,7 @@ public partial class CommandContext
             AllowSendingWithoutReply = true
         };
 
-        if (EngineConfig.ReplyMode == ReplyMode.ReplyToSender)
+        if (EngineConfig?.ReplyMode == ReplyMode.ReplyToSender)
         {
             replyParameters.MessageId = MessageId;
         }
