@@ -1,0 +1,9 @@
+- Build (repo root): `dotnet build` (or `dotnet build -c Release`).
+- Run sample host:
+  - `cd ZiziBot.TelegramBot.Sample`
+  - `dotnet run`
+- Pack (NuGet package for framework, repo root): `dotnet pack -c Release`.
+- CI parity (publish workflow): `dotnet restore` -> `dotnet build -c Release` -> `dotnet pack -c Release`.
+- No test projects currently; if added later: `dotnet test` at repo root.
+- Troubleshooting SDK mismatch:
+  - Ensure .NET 10 SDK installed for the sample (`net10.0`).

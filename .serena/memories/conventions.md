@@ -1,0 +1,17 @@
+- Commands:
+  - Implement as classes inheriting `BotCommandController`.
+  - Route by attributes on methods: `[Command]`, `[TextCommand]`, `[TypedCommand]`, `[UpdateCommand]`, `[InlineQuery]`, `[Callback]`, `[DefaultCommand]`.
+  - Controllers are constructed via `ActivatorUtilities.CreateInstance`; constructor DI is supported.
+  - Prefer using `Context` + controller helper wrappers (`SendMessage`, `AnswerCallbackQuery`, `AnswerInlineQuery`) instead of reaching into Telegram client directly.
+- Middleware:
+  - Implement `IBeforeCommand` and call `next(commandContext)` to pass; skipping it cancels command invocation.
+  - Implement `IAfterCommand` for post-invocation work.
+  - Disable middleware by annotating the class with `[DisabledMiddleware]` or listing its class name in `BotEngine.DisabledMiddleware`.
+- Configuration:
+  - Binding paths are `BotEngine` (`BotEngineConfig.ConfigPath`) and `BotEngine:Bot` (`BotTokenConfig.ConfigPath`).
+  - Important pitfall: sample `appsettings.Development.json` uses `ReplyStrategy`/`ExecutionStrategy`, but the model properties are `ReplyMode`/`ExecutionMode`.
+- Routing behavior (non-obvious):
+  - Message routing checks in order: `[Command]` -> `[TextCommand]` -> `[TypedCommand]` -> `[DefaultCommand]`.
+  - Inline query fallback: if no command match, falls back to any `[InlineQuery]`.
+  - Callback fallback: falls back to `[Callback]` with empty command.
+  - `ComparisonMode` enum has more values than currently implemented in router’s `TextCommand` switch.

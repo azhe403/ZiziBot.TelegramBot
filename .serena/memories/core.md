@@ -1,0 +1,17 @@
+- Repo: C#/.NET Telegram bot framework + sample host.
+- Solution: `ZiziBot.TelegramBot.sln` with 2 projects:
+  - Framework: `ZiziBot.TelegramBot.Framework/` (routing, middleware pipeline, polling/webhook engines)
+  - Sample: `ZiziBot.TelegramBot.Sample/` (ASP.NET Core minimal host using the framework)
+- Read these when working in each area:
+  - Framework architecture + entrypoints: `mem:framework/core`
+  - Sample host wiring + examples: `mem:sample/core`
+- Project-wide references:
+  - Toolchain + deps: `mem:tech_stack`
+  - Commands to build/run/pack: `mem:suggested_commands`
+  - Codebase conventions/pitfalls: `mem:conventions`
+  - “Done” checklist for tasks: `mem:task_completion`
+- Primary runtime invariants (framework):
+  - `AddZiziBotTelegramBot()` does assembly scanning for controllers + middleware and selects engine based on `BotEngine.EngineMode`.
+  - `UseZiziBotTelegramBot()` maps webhook endpoints (if `WebApplication`) and starts the selected `IBotEngine`.
+  - Each update is processed in an async DI scope via `BotEngineHandler` -> `BotUpdateHandler`.
+- Docs artifact: `CODE_WIKI.md` at repo root (human-facing, comprehensive).
