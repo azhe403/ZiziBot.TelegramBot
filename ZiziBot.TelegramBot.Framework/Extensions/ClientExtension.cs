@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,16 +19,22 @@ public static class ClientExtension
     {
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-        services.AddSingleton(provider =>
+        services.AddSingleton(_ =>
         {
-            var botCommandCollection = new BotCommandCollection()
-            {
-                CommandTypes = assemblies
-                    .SelectMany(s => s.GetTypes())
-                    .Where(x => x.IsSubclassOf(typeof(BotCommandController)))
-            };
+            var commandTypes = assemblies
+                .SelectMany(s => s.GetTypes())
+                .Where(x => x.IsSubclassOf(typeof(BotCommandController)))
+                .ToArray();
 
-            return botCommandCollection;
+            var methods = commandTypes
+                .SelectMany(x => x.GetMethods())
+                .ToArray();
+
+            return new BotCommandCollection
+            {
+                CommandTypes = commandTypes,
+                Methods = methods
+            };
         });
 
         services.Scan(selector => selector.FromAssemblies(assemblies)
@@ -41,65 +47,71 @@ public static class ClientExtension
             .As<IAfterCommand>()
             .WithScopedLifetime());
 
-        using var provider = services.BuildServiceProvider();
-
-        var hostingEnvironment = provider.GetRequiredService<IWebHostEnvironment>();
-        var logger = provider.GetRequiredService<ILogger<BotEngineHandler>>();
-
-        var internalEngineConfig = new BotEngineConfig();
-
         if (engineConfig == null)
         {
-            var botConfigurations = new List<BotTokenConfig>();
-            var configuration = provider.GetRequiredService<IConfiguration>();
+            services.AddSingleton(sp =>
+            {
+                var botConfigurations = new List<BotTokenConfig>();
+                var configuration = sp.GetRequiredService<IConfiguration>();
+                configuration.GetSection(BotTokenConfig.ConfigPath).Bind(botConfigurations);
+                return botConfigurations;
+            });
 
-            configuration.GetSection(BotTokenConfig.ConfigPath).Bind(botConfigurations);
-            configuration.GetSection(BotEngineConfig.ConfigPath).Bind(internalEngineConfig);
+            services.AddSingleton(sp =>
+            {
+                var configuration = sp.GetRequiredService<IConfiguration>();
+                var hostingEnvironment = sp.GetRequiredService<IWebHostEnvironment>();
+                var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(ClientExtension).FullName ?? nameof(ClientExtension));
 
-            services.AddSingleton(botConfigurations);
+                var internalEngineConfig = new BotEngineConfig();
+               
+                configuration.GetSection(BotEngineConfig.ConfigPath).Bind(internalEngineConfig);
+
+                internalEngineConfig.ActualEngineMode = internalEngineConfig.EngineMode switch
+                {
+                    BotEngineMode.Webhook => BotEngineMode.Webhook,
+                    BotEngineMode.Polling => BotEngineMode.Polling,
+                    _ => hostingEnvironment.IsDevelopment() ? BotEngineMode.Polling : BotEngineMode.Webhook
+                };
+
+                logger.LogInformation("Bot engine mode is {EngineMode}, actual mode is {ActualEngineMode}", internalEngineConfig.EngineMode, internalEngineConfig.ActualEngineMode);
+
+                return internalEngineConfig;
+            });
         }
         else
         {
             var configBot = engineConfig.Bot ?? throw new ApplicationException("Bot config is null");
 
             services.AddSingleton(configBot);
-            internalEngineConfig = engineConfig;
-        }
-
-        logger.LogInformation("Bot engine mode is {EngineMode}", internalEngineConfig.EngineMode);
-
-
-        switch (internalEngineConfig.EngineMode)
-        {
-            case BotEngineMode.Webhook:
-                services.EnableWebhookEngine();
-                internalEngineConfig.ActualEngineMode = BotEngineMode.Webhook;
-                break;
-            case BotEngineMode.Polling:
-                services.EnablePollingEngine();
-                internalEngineConfig.ActualEngineMode = BotEngineMode.Polling;
-                break;
-            case BotEngineMode.Auto:
-            default:
+            services.AddSingleton(sp =>
             {
-                if (hostingEnvironment.IsDevelopment())
-                {
-                    logger.LogInformation("Starting bot in Polling mode because of Development environment");
-                    services.EnablePollingEngine();
-                    internalEngineConfig.ActualEngineMode = BotEngineMode.Polling;
-                }
-                else
-                {
-                    logger.LogInformation("Starting bot in Webhook mode because of non-Development environment");
-                    services.EnableWebhookEngine();
-                    internalEngineConfig.ActualEngineMode = BotEngineMode.Webhook;
-                }
+                var hostingEnvironment = sp.GetRequiredService<IWebHostEnvironment>();
+                var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(ClientExtension).FullName ?? nameof(ClientExtension));
 
-                break;
-            }
+                engineConfig.ActualEngineMode = engineConfig.EngineMode switch
+                {
+                    BotEngineMode.Webhook => BotEngineMode.Webhook,
+                    BotEngineMode.Polling => BotEngineMode.Polling,
+                    _ => hostingEnvironment.IsDevelopment() ? BotEngineMode.Polling : BotEngineMode.Webhook
+                };
+
+                logger.LogInformation("Bot engine mode is {EngineMode}, actual mode is {ActualEngineMode}", engineConfig.EngineMode, engineConfig.ActualEngineMode);
+                
+                return engineConfig;
+            });
         }
 
-        services.AddSingleton(internalEngineConfig);
+        services.AddSingleton<BotPollingEngine>();
+        services.AddSingleton<BotWebhookEngine>();
+        services.AddSingleton<IBotEngine>(sp =>
+        {
+            var config = sp.GetRequiredService<BotEngineConfig>();
+            return config.ActualEngineMode == BotEngineMode.Polling
+                ? sp.GetRequiredService<BotPollingEngine>()
+                : sp.GetRequiredService<BotWebhookEngine>();
+        });
+
         services.AddSingleton<BotEngineHandler>();
         services.AddSingleton<BotClientCollection>();
         services.AddScoped<BotUpdateHandler>();
@@ -108,31 +120,12 @@ public static class ClientExtension
         return services;
     }
 
-    private static IServiceCollection EnablePollingEngine(this IServiceCollection services)
-    {
-        using var provider = services.BuildServiceProvider();
-        var logger = provider.GetRequiredService<ILogger<BotPollingEngine>>();
-
-        logger.LogInformation("Enabling Polling engine");
-        services.AddSingleton<IBotEngine, BotPollingEngine>();
-
-        return services;
-    }
-
-    private static IServiceCollection EnableWebhookEngine(this IServiceCollection services)
-    {
-        using var provider = services.BuildServiceProvider();
-        var logger = provider.GetRequiredService<ILogger<BotWebhookEngine>>();
-
-        logger.LogInformation("Enabling Webhook engine");
-        services.AddSingleton<IBotEngine, BotWebhookEngine>();
-
-        return services;
-    }
-
     public static async Task<IApplicationBuilder> UseZiziBotTelegramBot(this IApplicationBuilder app)
     {
-        app.StartWebhookModeInternal();
+        var config = app.ApplicationServices.GetRequiredService<BotEngineConfig>();
+      
+        if (config.ActualEngineMode == BotEngineMode.Webhook)
+            app.StartWebhookModeInternal();
 
         _ = await app.StartTelegramBot();
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -33,7 +33,7 @@ public static class EndpointExtension
                 return;
             }
 
-            await botEngine.UpdateHandler(bot.Client, update, CancellationToken.None);
+            await botEngine.UpdateHandler(bot.Client, update, context.RequestAborted);
 
             await context.Response.WriteAsync("OK");
         });

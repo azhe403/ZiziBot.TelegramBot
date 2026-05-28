@@ -15,3 +15,5 @@
   - `UseZiziBotTelegramBot()` maps webhook endpoints (if `WebApplication`) and starts the selected `IBotEngine`.
   - Each update is processed in an async DI scope via `BotEngineHandler` -> `BotUpdateHandler`.
 - Docs artifact: `CODE_WIKI.md` at repo root (human-facing, comprehensive).
+- Project structure: `mem:structure`
+- Adding new commands: `mem:commands`

@@ -81,6 +81,7 @@ public partial class CommandContext
 
     public string? Command => MessageTexts?.FirstOrDefault();
     public string? CommandParam => MessageText?.Replace(Command ?? string.Empty, string.Empty).Trim();
+    public Dictionary<string, object> Properties { get; set; } = new();
 
     #endregion
 

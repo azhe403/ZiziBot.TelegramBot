@@ -15,12 +15,28 @@ public class BotEngineHandler(
 {
     public async Task UpdateHandler(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
-        var updateHandlerInternal = UpdateHandlerInternal(botClient, update, token);
+        try
+        {
+            var updateHandlerInternal = UpdateHandlerInternal(botClient, update, token);
 
-        if (engineConfig.ExecutionMode == ExecutionMode.Await)
-            await updateHandlerInternal;
-        else if (engineConfig.ExecutionMode == ExecutionMode.Background)
-            _ = updateHandlerInternal;
+            if (engineConfig.ExecutionMode == ExecutionMode.Await)
+            {
+                await updateHandlerInternal;
+            }
+            else if (engineConfig.ExecutionMode == ExecutionMode.Background)
+            {
+                _ = updateHandlerInternal.ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                        logger.LogError(t.Exception, "Error handling update in background. UpdateId: {UpdateId}", update.Id);
+                }, TaskContinuationOptions.OnlyOnFaulted);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error handling update. UpdateId: {UpdateId}", update.Id);
+            throw;
+        }
     }
 
     private async Task UpdateHandlerInternal(ITelegramBotClient botClient, Update update, CancellationToken token)

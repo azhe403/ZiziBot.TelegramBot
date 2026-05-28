@@ -24,8 +24,8 @@ public class BotUpdateHandler(
     CommandContext commandContext
 )
 {
-    private IEnumerable<Type> BotCommands => GetCommands();
-    private List<MethodInfo> BotMethods => GetMethods();
+    private IEnumerable<Type> BotCommands => commandCollection.CommandTypes;
+    private IReadOnlyList<MethodInfo> BotMethods => commandCollection.Methods.Count != 0 ? commandCollection.Methods : GetMethods();
 
     #region Type Handling
 
@@ -240,6 +240,16 @@ public class BotUpdateHandler(
             var beforeCommands = provider.GetServices<IBeforeCommand>()
                 .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
                 .Where(x => botEngineConfig.DisabledMiddleware?.Contains(x.GetType().Name) == false)
+                .Where(x =>
+                {
+                    var middlewareFilter = x.GetType().GetCustomAttributes<MiddlewareFilterAttribute>();
+                    var middlewareFilters = middlewareFilter as MiddlewareFilterAttribute[] ?? middlewareFilter.ToArray();
+                    
+                    if (middlewareFilters.Any())
+                        return middlewareFilters.Any(y => y.UpdateType == commandContext.Update?.Type);
+
+                    return true;
+                })
                 .ToList();
 
             var passedMiddlewareCount = 0;
@@ -248,6 +258,12 @@ public class BotUpdateHandler(
             foreach (var command in beforeCommands)
             {
                 var middlewareName = command.GetType().Name;
+
+                var middlewareConfig = command as IMiddlewareConfig;
+                if (middlewareConfig != null)
+                {
+                    middlewareConfig.Config = botEngineConfig;
+                }
 
                 logger.LogDebug("Session: {SessionId} - BeforeMiddleware - Invoking: {Middleware}", commandContext.SessionId, middlewareName);
                 await command.ExecuteAsync(commandContext, data =>
@@ -282,12 +298,27 @@ public class BotUpdateHandler(
         {
             var afterCommands = provider.GetServices<IAfterCommand>()
                 .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
+                .Where(x =>
+                {
+                    var middlewareFilter = x.GetType().GetCustomAttributes<MiddlewareFilterAttribute>();
+                    var middlewareFilters = middlewareFilter as MiddlewareFilterAttribute[] ?? middlewareFilter.ToArray();
+                    
+                    if (middlewareFilters.Any())
+                        return middlewareFilters.Any(y => y.UpdateType == commandContext.Update?.Type);
+
+                    return true;
+                })
                 .ToList();
 
             logger.LogTrace("Session: {SessionId} - AfterMiddleware Found {Count} Middlewares", commandContext.SessionId, afterCommands.Count);
             foreach (var command in afterCommands)
             {
                 var middlewareName = command.GetType().Name;
+
+                if (command is IMiddlewareConfig middlewareConfig)
+                {
+                    middlewareConfig.Config = botEngineConfig;
+                }
 
                 logger.LogDebug("Session: {SessionId} - AfterMiddleware - Invoking: {Middleware}", commandContext.SessionId, middlewareName);
                 await command.ExecuteAsync(commandContext);
@@ -373,12 +404,13 @@ public class BotUpdateHandler(
 
     private BotCommandInfo? GetMethod(Message message)
     {
-        var method = BotMethods.Find(x => x.GetCustomAttributes<CommandAttribute>().Any(a => message.Text?.Split(" ").FirstOrDefault()?.Equals($"/{a.Path}") ?? false));
+        var method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<CommandAttribute>().Any(a =>
+            message.Text?.Split(" ").FirstOrDefault()?.Equals($"/{a.Path}") ?? false));
 
         if (method == null)
         {
             var messageText = message.Text ?? string.Empty;
-            method = BotMethods.Find(x => x.GetCustomAttributes<TextCommandAttribute>().Any(a =>
+            method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<TextCommandAttribute>().Any(a =>
             {
                 return a.ComparisonMode switch
                 {
@@ -390,7 +422,7 @@ public class BotUpdateHandler(
         }
 
         if (method == null)
-            method = BotMethods.Find(x => x.GetCustomAttributes<TypedCommandAttribute>().Any(a => message.Type == a.MessageType));
+            method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<TypedCommandAttribute>().Any(a => message.Type == a.MessageType));
 
         if (method == null)
             method = BotMethods.SingleOrDefault(x => x.GetCustomAttributes<DefaultCommandAttribute>().Any());
@@ -416,11 +448,6 @@ public class BotUpdateHandler(
     private List<MethodInfo> GetMethods()
     {
         return commandCollection.CommandTypes.SelectMany(x => x.GetMethods()).ToList();
-    }
-
-    private IEnumerable<Type> GetCommands()
-    {
-        return commandCollection.CommandTypes;
     }
 
     #endregion

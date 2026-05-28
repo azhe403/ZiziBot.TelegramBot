@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using ZiziBot.TelegramBot.Framework.Handlers;
@@ -17,6 +17,7 @@ public class BotPollingEngine(
 {
     public async Task Start(BotClientItem clients)
     {
+        logger.LogInformation("Starting polling for bot: {Name}", clients.Name);
         try
         {
             if (botClientCollection.Items.Exists(x => x.Name == clients.Name))
@@ -27,7 +28,11 @@ public class BotPollingEngine(
 
             await clients.Client.DeleteWebhook();
 
-            clients.Client.StartReceiving(botEngineHandler.UpdateHandler, ErrorHandler);
+            clients.Client.StartReceiving(
+                botEngineHandler.UpdateHandler,
+                ErrorHandler,
+                new ReceiverOptions(),
+                clients.CancellationTokenSource?.Token ?? CancellationToken.None);
             botClientCollection.Items.Add(clients);
         }
         catch (Exception exception)
@@ -38,6 +43,7 @@ public class BotPollingEngine(
 
     public async Task Start()
     {
+        logger.LogDebug("Starting polling engine...");
         var clients = botTokenConfigs.Select(x => BotClientItem.Create(x.Name, new TelegramBotClientOptions(x.Token)));
 
         foreach (var client in clients)
@@ -63,6 +69,14 @@ public class BotPollingEngine(
         {
             await Stop(name);
         }
+    }
+
+    public async Task StopEngine()
+    {
+        logger.LogDebug("Stopping polling engine...");
+
+        var botNames = botClientCollection.Items.Select(x => x.Name).ToList();
+        await Stop(botNames);
     }
 
     private Task ErrorHandler(ITelegramBotClient botClient, Exception exception, HandleErrorSource errorSource, CancellationToken token)
