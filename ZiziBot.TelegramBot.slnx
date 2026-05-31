@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ZiziBot.TelegramBot.Framework/ZiziBot.TelegramBot.Framework.csproj" />
+  <Project Path="ZiziBot.TelegramBot.Sample/ZiziBot.TelegramBot.Sample.csproj" />
+</Solution>
