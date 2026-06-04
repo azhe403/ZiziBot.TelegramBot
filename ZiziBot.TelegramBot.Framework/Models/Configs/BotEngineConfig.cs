@@ -1,4 +1,4 @@
-﻿using ZiziBot.TelegramBot.Framework.Models.Enums;
+using ZiziBot.TelegramBot.Framework.Models.Enums;
 
 namespace ZiziBot.TelegramBot.Framework.Models.Configs;
 
@@ -7,6 +7,8 @@ public class BotEngineConfig
     public const string ConfigPath = "BotEngine";
 
     public string? WebhookUrl { get; set; }
+    public string? WebhookKey { get; set; }
+    public bool UseBotTokenInWebhookPath { get; set; } = true;
     public BotEngineMode EngineMode { get; set; }
     public BotEngineMode ActualEngineMode { get; set; }
     public ReplyMode ReplyMode { get; set; }

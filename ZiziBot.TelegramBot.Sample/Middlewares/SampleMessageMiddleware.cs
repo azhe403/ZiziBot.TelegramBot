@@ -13,7 +13,7 @@ public class SampleMessageMiddleware(ILogger<SampleMessageMiddleware> logger) : 
 {
     public async Task ExecuteAsync(CommandContext commandContext, CommandDelegate next)
     {
-        logger.LogInformation("This middleware is only executed for Message updates.");
+        logger.LogInformation("Session: {SessionId} - This middleware is only executed for Message updates.", commandContext.SessionId);
         await next(commandContext);
     }
 }

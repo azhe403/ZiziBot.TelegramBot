@@ -1,7 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using ZiziBot.TelegramBot.Framework.Extensions;
 using ZiziBot.TelegramBot.Framework.Models.Configs;
 using ZiziBot.TelegramBot.Framework.Models.Enums;
 
@@ -13,6 +14,10 @@ public class BotEngineHandler(
     BotEngineConfig engineConfig
 )
 {
+    /// <summary>
+    /// Handles a single Telegram update using a fresh DI scope.
+    /// Execution is controlled by <see cref="BotEngineConfig.ExecutionMode"/>.
+    /// </summary>
     public async Task UpdateHandler(ITelegramBotClient botClient, Update update, CancellationToken token)
     {
         try
@@ -25,11 +30,7 @@ public class BotEngineHandler(
             }
             else if (engineConfig.ExecutionMode == ExecutionMode.Background)
             {
-                _ = updateHandlerInternal.ContinueWith(t =>
-                {
-                    if (t.IsFaulted)
-                        logger.LogError(t.Exception, "Error handling update in background. UpdateId: {UpdateId}", update.Id);
-                }, TaskContinuationOptions.OnlyOnFaulted);
+                updateHandlerInternal.FireAndForget(logger);
             }
         }
         catch (Exception e)

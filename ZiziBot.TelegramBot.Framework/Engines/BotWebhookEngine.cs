@@ -15,12 +15,15 @@ public class BotWebhookEngine(
     BotEngineConfig botEngineConfig
 ) : IBotEngine
 {
+    /// <summary>
+    /// Registers the webhook for a single bot client and stores it in the shared collection.
+    /// </summary>
     public async Task Start(BotClientItem clients)
     {
         logger.LogInformation("Starting webhook for bot: {Name}", clients.Name);
         try
         {
-            if (botClientCollection.Items.Exists(x => x.Name == clients.Name))
+            if (botClientCollection.ContainsName(clients.Name))
             {
                 logger.LogWarning("Bot webhook engine is already running for bot: {Name}", clients.Name);
                 return;
@@ -34,12 +37,22 @@ public class BotWebhookEngine(
                 return;
             }
 
-            var webhookUrl = botEngineConfig.WebhookUrl + "/" + ValueConst.WebHookPath + "/" + clients.BotToken;
-            logger.LogDebug("Setting up Webhook url for Bot {BotId} to {WebhookUrl}", clients.Client.BotId, webhookUrl);
+            // Build webhook route as:
+            // - /{WebHookPath}/{bot} when WebhookKey is not set
+            // - /{WebHookPath}/{WebhookKey}/{bot} when WebhookKey is set
+            var routePrefix = string.IsNullOrWhiteSpace(botEngineConfig.WebhookKey)
+                ? $"{ValueConst.WebHookPath}"
+                : $"{ValueConst.WebHookPath}/{botEngineConfig.WebhookKey}";
+
+            // Avoid exposing the bot token in URLs by using the bot name as the path segment.
+            var botSegment = botEngineConfig.UseBotTokenInWebhookPath ? clients.BotToken : clients.Name;
+            var webhookUrl = $"{botEngineConfig.WebhookUrl}/{routePrefix}/{botSegment}";
+
+            logger.LogDebug("Setting up Webhook for Bot {BotId}", clients.Client.BotId);
 
             await clients.Client.SetWebhook(webhookUrl);
 
-            botClientCollection.Items.Add(clients);
+            _ = botClientCollection.TryAdd(clients);
         }
         catch (Exception exception)
         {
@@ -60,14 +73,10 @@ public class BotWebhookEngine(
 
     public Task Stop(string name)
     {
-        var client = botClientCollection.Items.Find(x => x.Name == name);
-        
-        if (client == null)
+        if (!botClientCollection.TryRemoveByName(name, out var client))
             return Task.CompletedTask;
-
-        botClientCollection.Items.Remove(client);
         
-        return client.Client.DeleteWebhook();
+        return client!.Client.DeleteWebhook();
     }
 
     public Task Stop(IEnumerable<string> names)
@@ -75,6 +84,9 @@ public class BotWebhookEngine(
         return Task.WhenAll(names.Select(Stop));
     }
 
+    /// <summary>
+    /// Stops all registered bots for the webhook engine (only when configured for webhook mode).
+    /// </summary>
     public async Task StopEngine()
     {
         logger.LogDebug("Stopping webhook engine...");
@@ -85,7 +97,7 @@ public class BotWebhookEngine(
             return;
         }
 
-        var botNames = botClientCollection.Items.Select(x => x.Name).ToList();
+        var botNames = botClientCollection.GetNamesSnapshot();
         await Stop(botNames);
     }
 }

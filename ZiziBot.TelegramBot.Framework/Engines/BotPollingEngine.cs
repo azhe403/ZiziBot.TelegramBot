@@ -15,12 +15,15 @@ public class BotPollingEngine(
     BotEngineHandler botEngineHandler
 ) : IBotEngine
 {
+    /// <summary>
+    /// Starts long-polling for a single bot client and registers it in the shared collection.
+    /// </summary>
     public async Task Start(BotClientItem clients)
     {
         logger.LogInformation("Starting polling for bot: {Name}", clients.Name);
         try
         {
-            if (botClientCollection.Items.Exists(x => x.Name == clients.Name))
+            if (botClientCollection.ContainsName(clients.Name))
             {
                 logger.LogWarning("Bot polling engine is already running");
                 return;
@@ -33,7 +36,8 @@ public class BotPollingEngine(
                 ErrorHandler,
                 new ReceiverOptions(),
                 clients.CancellationTokenSource?.Token ?? CancellationToken.None);
-            botClientCollection.Items.Add(clients);
+
+            _ = botClientCollection.TryAdd(clients);
         }
         catch (Exception exception)
         {
@@ -44,22 +48,32 @@ public class BotPollingEngine(
     public async Task Start()
     {
         logger.LogDebug("Starting polling engine...");
-        var clients = botTokenConfigs.Select(x => BotClientItem.Create(x.Name, new TelegramBotClientOptions(x.Token)));
 
-        foreach (var client in clients)
+        foreach (var botTokenConfig in botTokenConfigs)
         {
-            await Start(client);
+            try
+            {
+                var options = new TelegramBotClientOptions(botTokenConfig.Token);
+                var client = BotClientItem.Create(botTokenConfig.Name, options);
+                await Start(client);
+            }
+            catch (ArgumentException argumentException) when (argumentException.Message.Contains("Bot token invalid"))
+            {
+                logger.LogError("Bot token invalid for bot: {BotName}. Please check your configuration.", botTokenConfig.Name);
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, "An error occurred while starting bot: {BotName}", botTokenConfig.Name);
+            }
         }
     }
 
     public Task Stop(string name)
     {
-        var client = botClientCollection.Items.Find(x => x.Name == name);
-        if (client == null)
+        if (!botClientCollection.TryRemoveByName(name, out var client))
             return Task.CompletedTask;
 
-        client.CancellationTokenSource?.Cancel();
-        botClientCollection.Items.Remove(client);
+        client!.CancellationTokenSource?.Cancel();
         return Task.CompletedTask;
     }
 
@@ -71,11 +85,14 @@ public class BotPollingEngine(
         }
     }
 
+    /// <summary>
+    /// Stops all registered bots for the polling engine.
+    /// </summary>
     public async Task StopEngine()
     {
         logger.LogDebug("Stopping polling engine...");
 
-        var botNames = botClientCollection.Items.Select(x => x.Name).ToList();
+        var botNames = botClientCollection.GetNamesSnapshot();
         await Stop(botNames);
     }
 

@@ -29,6 +29,9 @@ public class BotUpdateHandler(
 
     #region Type Handling
 
+    /// <summary>
+    /// Routes an incoming Telegram update to the appropriate command handler (if any) and runs middleware.
+    /// </summary>
     public async Task<object?> HandleUpdate(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         try
@@ -58,6 +61,9 @@ public class BotUpdateHandler(
         }
     }
 
+    /// <summary>
+    /// Tracks pending update counts for diagnostics (polling/webhook) without affecting the main update flow.
+    /// </summary>
     private async Task TrackUpdate(CancellationToken token)
     {
         try
@@ -88,81 +94,69 @@ public class BotUpdateHandler(
         }
     }
 
+    /// <summary>
+    /// Finds and invokes a command handler for non-message updates (inline query, callback query, etc.).
+    /// Returns null when there is no matching handler.
+    /// </summary>
     private async Task<object?> OnUpdate()
     {
-        try
+        ArgumentNullException.ThrowIfNull(commandContext.Update);
+        ArgumentNullException.ThrowIfNull(commandContext.BotClient);
+
+        logger.LogTrace("Session: {SessionId} - Finding command for update type: {UpdateType}", commandContext.SessionId, commandContext.Update.Type);
+        var method = commandContext.Update.Type switch
         {
-            ArgumentNullException.ThrowIfNull(commandContext.Update);
-            ArgumentNullException.ThrowIfNull(commandContext.BotClient);
+            UpdateType.InlineQuery => GetMethod(commandContext.Update.InlineQuery!),
+            UpdateType.CallbackQuery => GetMethod(commandContext.Update.CallbackQuery!),
+            _ => GetMethod(commandContext.Update)
+        };
 
-            logger.LogTrace("Session: {SessionId} - Finding command for update type: {UpdateType}", commandContext.SessionId, commandContext.Update.Type);
-            var method = commandContext.Update.Type switch
-            {
-                UpdateType.InlineQuery => GetMethod(commandContext.Update.InlineQuery!),
-                UpdateType.CallbackQuery => GetMethod(commandContext.Update.CallbackQuery!),
-                _ => GetMethod(commandContext.Update)
-            };
-
-            if (method == null)
-            {
-                logger.LogWarning("Session: {SessionId} - No handler for {UpdateType} in UpdateId: {UpdateId}", commandContext.SessionId, commandContext.Update.Type,
-                    commandContext.Update.Id);
-                return null;
-            }
-
-            logger.LogTrace("Session: {SessionId} - Found command for update type: {UpdateType}", commandContext.SessionId, commandContext.Update.Type);
-
-            method.Update = commandContext.Update;
-            var invokeMethod = await InvokeMethod(method);
-
-            return invokeMethod;
-        }
-        catch (Exception exception)
+        if (method == null)
         {
-            logger.LogError(exception, "Session: {SessionId} - Error on update handler.", commandContext.SessionId);
+            logger.LogWarning("Session: {SessionId} - No handler for {UpdateType} in UpdateId: {UpdateId}", commandContext.SessionId, commandContext.Update.Type,
+                commandContext.Update.Id);
+            return null;
         }
 
-        return null;
+        logger.LogTrace("Session: {SessionId} - Found command for update type: {UpdateType}", commandContext.SessionId, commandContext.Update.Type);
+
+        method.Update = commandContext.Update;
+        return await InvokeMethod(method);
     }
 
+    /// <summary>
+    /// Finds and invokes a command handler for message and edited-message updates.
+    /// Returns null when there is no matching handler.
+    /// </summary>
     private async Task<object?> OnMessage()
     {
-        try
+        ArgumentNullException.ThrowIfNull(commandContext.Update);
+        ArgumentNullException.ThrowIfNull(commandContext.BotClient);
+
+        var message = commandContext.Update.Message ?? commandContext.Update.EditedMessage;
+        logger.LogTrace("Session: {SessionId} - Finding command for message: {MessageText}", commandContext.SessionId, message?.Text);
+        var method = GetMethod(message!);
+
+        if (method == null)
         {
-            ArgumentNullException.ThrowIfNull(commandContext.Update);
-            ArgumentNullException.ThrowIfNull(commandContext.BotClient);
-
-            var message = commandContext.Update.Message ?? commandContext.Update.EditedMessage;
-            logger.LogTrace("Session: {SessionId} - Finding command for message: {MessageText}", commandContext.SessionId, message?.Text);
-            var method = GetMethod(message!);
-
-            if (method == null)
-            {
-                logger.LogWarning("Session: {SessionId} - No handler for MessageId: {MessageId} in UpdateId: {UpdateId}", commandContext.SessionId, message?.MessageId,
-                    commandContext.Update.Id);
-                return null;
-            }
-
-            logger.LogTrace("Session: {SessionId} - Found command for message: {MessageText}", commandContext.SessionId, message?.Text);
-
-            method.Update = commandContext.Update;
-
-            var invokeMethod = await InvokeMethod(method);
-
-            return invokeMethod;
-        }
-        catch (Exception exception)
-        {
-            logger.LogError(exception, "Session: {SessionId} - Error on message handler.", commandContext.SessionId);
+            logger.LogWarning("Session: {SessionId} - No handler for MessageId: {MessageId} in UpdateId: {UpdateId}", commandContext.SessionId, message?.MessageId,
+                commandContext.Update.Id);
+            return null;
         }
 
-        return null;
+        logger.LogTrace("Session: {SessionId} - Found command for message: {MessageText}", commandContext.SessionId, message?.Text);
+
+        method.Update = commandContext.Update;
+        return await InvokeMethod(method);
     }
 
     #endregion
 
     #region Invocation
 
+    /// <summary>
+    /// Prepares the <see cref="CommandContext"/>, executes before/after middleware, and invokes the command.
+    /// </summary>
     private async Task<object?> InvokeMethod(BotCommandInfo? botCommandInfo)
     {
         try
@@ -172,9 +166,12 @@ public class BotUpdateHandler(
             List<object> paramList = [];
             var methodParams = botCommandInfo.Method.GetParameters();
 
+            if (commandContext.BotClient == null || !botClientCollection.TryGetByClient(commandContext.BotClient, out var currentBotClientItem))
+                throw new InvalidOperationException("Bot client is not registered in BotClientCollection.");
+
             commandContext.SetContext(new CommandContext()
             {
-                BotToken = botClientCollection.Items.First(x => x.Client == commandContext.BotClient).BotToken,
+                BotToken = currentBotClientItem!.BotToken,
                 BotClient = commandContext.BotClient,
                 EngineConfig = botEngineConfig,
                 Update = botCommandInfo.Update!
@@ -207,6 +204,9 @@ public class BotUpdateHandler(
         }
     }
 
+    /// <summary>
+    /// Creates a controller instance and invokes the command method via reflection.
+    /// </summary>
     private async Task<object?> InvokeCommand(BotCommandInfo botCommandInfo, List<object> paramList)
     {
         try
@@ -233,13 +233,16 @@ public class BotUpdateHandler(
         }
     }
 
+    /// <summary>
+    /// Executes all enabled "before" middleware for the current update and returns whether processing should continue.
+    /// </summary>
     private async Task<bool> ExecuteBeforeMiddlewareAsync()
     {
         try
         {
             var beforeCommands = provider.GetServices<IBeforeCommand>()
                 .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
-                .Where(x => botEngineConfig.DisabledMiddleware?.Contains(x.GetType().Name) == false)
+                .Where(x => botEngineConfig.DisabledMiddleware?.Contains(x.GetType().Name) != true)
                 .Where(x =>
                 {
                     var middlewareFilter = x.GetType().GetCustomAttributes<MiddlewareFilterAttribute>();
@@ -292,12 +295,16 @@ public class BotUpdateHandler(
         }
     }
 
+    /// <summary>
+    /// Executes all enabled "after" middleware for the current update.
+    /// </summary>
     private async Task ExecuteAfterMiddlewareAsync()
     {
         try
         {
             var afterCommands = provider.GetServices<IAfterCommand>()
                 .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
+                .Where(x => botEngineConfig.DisabledMiddleware?.Contains(x.GetType().Name) != true)
                 .Where(x =>
                 {
                     var middlewareFilter = x.GetType().GetCustomAttributes<MiddlewareFilterAttribute>();
@@ -336,6 +343,9 @@ public class BotUpdateHandler(
 
     #region Command
 
+    /// <summary>
+    /// Finds a handler method for an update based on <see cref="UpdateCommandAttribute"/>.
+    /// </summary>
     private BotCommandInfo? GetMethod(Update update)
     {
         var method = BotMethods.FirstOrDefault(info => info.GetCustomAttributes<UpdateCommandAttribute>().Any(a => a.UpdateType == update.Type));
@@ -353,9 +363,12 @@ public class BotUpdateHandler(
         return null;
     }
 
+    /// <summary>
+    /// Finds a handler method for an inline query based on <see cref="InlineQueryAttribute"/>.
+    /// </summary>
     private BotCommandInfo? GetMethod(InlineQuery inlineQuery)
     {
-        var inlineQueryCommands = inlineQuery.Query.Split(" ");
+        var inlineQueryCommands = inlineQuery.Query.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         var inlineQueryCommand = inlineQueryCommands.FirstOrDefault();
         var method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<InlineQueryAttribute>().Any(attribute => attribute.Command == inlineQueryCommand));
 
@@ -377,9 +390,12 @@ public class BotUpdateHandler(
         return null;
     }
 
+    /// <summary>
+    /// Finds a handler method for a callback query based on <see cref="CallbackAttribute"/>.
+    /// </summary>
     private BotCommandInfo? GetMethod(CallbackQuery callbackQuery)
     {
-        var callbackQueryCommands = callbackQuery.Data?.Split(" ");
+        var callbackQueryCommands = callbackQuery.Data?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         var callbackQueryCommand = callbackQueryCommands?.FirstOrDefault();
         var method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<CallbackAttribute>().Any(attribute => attribute.Command == callbackQueryCommand));
 
@@ -402,10 +418,29 @@ public class BotUpdateHandler(
         return null;
     }
 
+    /// <summary>
+    /// Finds a handler method for a message based on command attributes and extracts parameters text.
+    /// Supports /command@botname format and stores the remaining text in <see cref="BotCommandInfo.Params"/>.
+    /// </summary>
     private BotCommandInfo? GetMethod(Message message)
     {
+        static (string FirstToken, string Remainder) SplitFirst(string? text)
+        {
+            var parts = (text ?? string.Empty).Split(' ', 2, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            return parts.Length switch
+            {
+                0 => (string.Empty, string.Empty),
+                1 => (parts[0], string.Empty),
+                _ => (parts[0], parts[1])
+            };
+        }
+
+        var (firstToken, remainder) = SplitFirst(message.Text);
+        var firstNoSlash = firstToken.StartsWith('/') ? firstToken[1..] : firstToken;
+        var commandToken = firstNoSlash.Split('@', 2, StringSplitOptions.TrimEntries)[0];
+
         var method = BotMethods.FirstOrDefault(x => x.GetCustomAttributes<CommandAttribute>().Any(a =>
-            message.Text?.Split(" ").FirstOrDefault()?.Equals($"/{a.Path}") ?? false));
+            commandToken.Equals(a.Path, StringComparison.OrdinalIgnoreCase)));
 
         if (method == null)
         {
@@ -414,7 +449,7 @@ public class BotUpdateHandler(
             {
                 return a.ComparisonMode switch
                 {
-                    ComparisonMode.CommandLike => messageText.Split(' ').FirstOrDefault()?.Equals(a.Command, StringComparison.OrdinalIgnoreCase) ?? false,
+                    ComparisonMode.CommandLike => SplitFirst(messageText).FirstToken.Equals(a.Command, StringComparison.OrdinalIgnoreCase),
                     ComparisonMode.Contains => messageText.Contains(a.Command, StringComparison.OrdinalIgnoreCase),
                     _ => messageText.Equals(a.Command, StringComparison.OrdinalIgnoreCase)
                 };
@@ -434,7 +469,7 @@ public class BotUpdateHandler(
                 ControllerType = BotCommands.Single(x => x == method.DeclaringType),
                 Method = method,
                 Message = message,
-                Params = string.Join(" ", message.Text?.Split(" ").Skip(1) ?? Array.Empty<string>())
+                Params = remainder
             };
         }
 

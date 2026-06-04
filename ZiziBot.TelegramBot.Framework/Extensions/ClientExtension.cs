@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -15,14 +16,33 @@ namespace ZiziBot.TelegramBot.Framework.Extensions;
 
 public static class ClientExtension
 {
+    /// <summary>
+    /// Registers framework services, command discovery, and engine configuration.
+    /// </summary>
     public static IServiceCollection AddZiziBotTelegramBot(this IServiceCollection services, BotEngineConfig? engineConfig = null)
     {
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
         services.AddSingleton(_ =>
         {
+            // Returns all loadable types for an assembly (skips dynamic assemblies and tolerates partial load failures).
+            static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+            {
+                if (assembly.IsDynamic)
+                    return Array.Empty<Type>();
+
+                try
+                {
+                    return assembly.GetTypes();
+                }
+                catch (ReflectionTypeLoadException ex)
+                {
+                    return ex.Types.Where(t => t != null).Cast<Type>();
+                }
+            }
+
             var commandTypes = assemblies
-                .SelectMany(s => s.GetTypes())
+                .SelectMany(GetLoadableTypes)
                 .Where(x => x.IsSubclassOf(typeof(BotCommandController)))
                 .ToArray();
 
