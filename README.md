@@ -60,6 +60,25 @@ public class SampleCommands : BotCommandController
 -   **Run**: The sample application can be run with the command `dotnet run` from the `ZiziBot.TelegramBot.Sample` directory.
 -   **URL**: When running, the sample application is accessible at `http://localhost:5157`.
 
+## Developer memories
+
+This repository maintains concise developer memories under `.serena/memories/` to help agents and contributors discover project knowledge quickly. Key memories:
+
+- `mem:core` — top-level project overview and links to other memories
+- `mem:framework/core` — framework-specific notes
+- `mem:sample/core` — sample host notes and config tips
+- `mem:tech_stack` — toolchain and dependency notes
+- `mem:conventions` — code and runtime conventions
+
+Developer commands:
+
+```powershell
+serena memories check
+dotnet run --project ZiziBot.TelegramBot.Sample
+```
+
+Memory refresh: 2026-06-06
+
 ## Demo project
 
 1. [ZiziBot-Engine](https://github.com/azhe403/ZiziBot-Engine)

@@ -1,3 +1,5 @@
+- # Core
+
 - Repo: C#/.NET Telegram bot framework + sample host.
 - Solution: `ZiziBot.TelegramBot.sln` with 2 projects:
   - Framework: `ZiziBot.TelegramBot.Framework/` (routing, middleware pipeline, polling/webhook engines)
@@ -15,5 +17,7 @@
   - `UseZiziBotTelegramBot()` maps webhook endpoints (if `WebApplication`) and starts the selected `IBotEngine`.
   - Each update is processed in an async DI scope via `BotEngineHandler` -> `BotUpdateHandler`.
 - Docs artifact: `CODE_WIKI.md` at repo root (human-facing, comprehensive).
+ - Docs artifact: `CODE_WIKI.md` and `README.md` at repo root (human-facing, comprehensive).
+ - Memory refreshed: 2026-06-06
 - Project structure: `mem:structure`
 - Adding new commands: `mem:commands`

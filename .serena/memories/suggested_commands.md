@@ -1,3 +1,5 @@
+- # Suggested Commands
+
 - Build (repo root): `dotnet build` (or `dotnet build -c Release`).
 - Run sample host:
   - `cd ZiziBot.TelegramBot.Sample`

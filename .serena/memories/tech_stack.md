@@ -1,3 +1,5 @@
+- # Tech Stack
+
 - Language: C# (nullable enabled), modern syntax (primary constructors used in core handlers/engines).
 - Build: `dotnet` (solution file), multi-target framework library.
 - Target frameworks:

@@ -1,3 +1,5 @@
+- # Conventions
+
 - Commands:
   - Implement as classes inheriting `BotCommandController`.
   - Route by attributes on methods: `[Command]`, `[TextCommand]`, `[TypedCommand]`, `[UpdateCommand]`, `[InlineQuery]`, `[Callback]`, `[DefaultCommand]`.
