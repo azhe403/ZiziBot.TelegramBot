@@ -153,6 +153,15 @@ public static class ClientExtension
         if (config.ActualEngineMode == BotEngineMode.Webhook)
             app.StartWebhookModeInternal();
 
+        var lifetime = app.ApplicationServices.GetRequiredService<IHostApplicationLifetime>();
+        lifetime.ApplicationStopping.Register(() =>
+        {
+            var botEngine = app.ApplicationServices.GetRequiredService<IBotEngine>();
+            var logger = app.ApplicationServices.GetRequiredService<ILogger<IBotEngine>>();
+            logger.LogInformation("Stopping bot engine gracefully");
+            botEngine.StopEngine().GetAwaiter().GetResult();
+        });
+
         _ = await app.StartTelegramBot();
 
         return app;

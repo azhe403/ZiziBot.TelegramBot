@@ -1,4 +1,4 @@
-﻿using ZiziBot.TelegramBot.Framework.Models;
+using ZiziBot.TelegramBot.Framework.Models;
 
 namespace ZiziBot.TelegramBot.Framework.Interfaces;
 
@@ -9,4 +9,5 @@ public interface IBotEngine
 
     Task Stop(string name);
     Task Stop(IEnumerable<string> names);
+    Task StopEngine();
 }
