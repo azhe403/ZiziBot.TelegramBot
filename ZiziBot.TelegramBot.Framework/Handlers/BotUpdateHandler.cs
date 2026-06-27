@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +25,8 @@ public class BotUpdateHandler(
     CommandContext commandContext
 )
 {
+    private static readonly ConcurrentDictionary<string, DateTime> LastTrackedTimes = new();
+
     private IEnumerable<Type> BotCommands => commandCollection.CommandTypes;
     private IReadOnlyList<MethodInfo> BotMethods => commandCollection.Methods.Count != 0 ? commandCollection.Methods : GetMethods();
 
@@ -70,6 +73,19 @@ public class BotUpdateHandler(
         {
             ArgumentNullException.ThrowIfNull(commandContext.BotClient);
             ArgumentNullException.ThrowIfNull(commandContext.EngineConfig);
+
+            if (!botClientCollection.TryGetByClient(commandContext.BotClient, out var currentBotClientItem))
+            {
+                return;
+            }
+
+            var botName = currentBotClientItem!.Name;
+            var now = DateTime.UtcNow;
+            if (LastTrackedTimes.TryGetValue(botName, out var lastTime) && (now - lastTime).TotalSeconds < 5)
+            {
+                return;
+            }
+            LastTrackedTimes[botName] = now;
 
             const int limitWarning = 5;
 
