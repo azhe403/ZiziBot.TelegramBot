@@ -1,5 +1,5 @@
-using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
+using ZiziBot.TelegramBot.Framework.Helpers;
 using ZiziBot.TelegramBot.Framework.Models.Configs;
 using ZiziBot.TelegramBot.Framework.Models.Enums;
 
@@ -65,7 +65,7 @@ public class BotEngineConfigValidator(ILogger<BotEngineConfigValidator> logger)
             {
                 errors.Add($"{prefix}: Token is required");
             }
-            else if (!IsValidBotToken(botConfig.Token))
+            else if (!RegexHelper.IsValidBotToken(botConfig.Token))
             {
                 errors.Add($"{prefix}: Token format is invalid (should match pattern: \\d+:[A-Za-z0-9_-]+)");
             }
@@ -88,12 +88,7 @@ public class BotEngineConfigValidator(ILogger<BotEngineConfigValidator> logger)
         }
     }
 
-    private static bool IsValidBotToken(string token)
-    {
-        // Telegram bot tokens match pattern: 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
-        var pattern = @"^\d+:[A-Za-z0-9_-]{35}$";
-        return Regex.IsMatch(token, pattern);
-    }
+
 
     private static bool IsValidUrl(string url)
     {
