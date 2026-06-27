@@ -1,0 +1,618 @@
+{
+  "schema": 2,
+  "commit": "f7e57470d49df6a4a03cd3661b3d1a1c5ff98f4b",
+  "branch": "main",
+  "base_sha": "01f4f40f36c8203cab060b570c71093608be111b",
+  "message": "docs: restructure code wiki and update serena memories",
+  "totals": {
+    "ai_lines": 0,
+    "human_lines": 921,
+    "deleted_lines": 49,
+    "files": 20
+  },
+  "by_tool": {},
+  "by_gen_type": {
+    "chat": 0,
+    "cli": 0,
+    "completion": 0,
+    "human": 970
+  },
+  "files": [
+    {
+      "path": ".serena/memories/conventions.md",
+      "type": "MODIFIED",
+      "added": 12,
+      "deleted": 6,
+      "lines": [
+        {
+          "start": 1,
+          "end": 1,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 3,
+          "end": 13,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 14,
+          "end": 19,
+          "type": "delete",
+          "author_type": "Human"
+        }
+      ]
+    },
+    {
+      "path": ".serena/memories/core.md",
+      "type": "MODIFIED",
+      "added": 10,
+      "deleted": 12,
+      "lines": [
+        {
+          "start": 1,
+          "end": 1,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 3,
+          "end": 11,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 12,
+          "end": 23,
+          "type": "delete",
+          "author_type": "Human"
+        }
+      ]
+    },
+    {
+      "path": ".serena/memories/framework-core.md",
+      "type": "RENAMED",
+      "renamed_from": ".serena/memories/framework/core.md",
+      "added": 10,
+      "deleted": 2,
+      "lines": [
+        {
+          "start": 1,
+          "end": 2,
+          "type": "delete",
+          "author_type": "Human"
+        },
+        {
+          "start": 5,
+          "end": 5,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 7,
+          "end": 7,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 21,
+          "end": 28,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": ".serena/memories/sample-core.md",
+      "type": "RENAMED",
+      "renamed_from": ".serena/memories/sample/core.md",
+      "added": 2,
+      "deleted": 2,
+      "lines": [
+        {
+          "start": 1,
+          "end": 2,
+          "type": "delete",
+          "author_type": "Human"
+        },
+        {
+          "start": 4,
+          "end": 4,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 6,
+          "end": 6,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": ".serena/memories/suggested_commands.md",
+      "type": "MODIFIED",
+      "added": 9,
+      "deleted": 1,
+      "lines": [
+        {
+          "start": 1,
+          "end": 1,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 3,
+          "end": 10,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 11,
+          "end": 11,
+          "type": "delete",
+          "author_type": "Human"
+        }
+      ]
+    },
+    {
+      "path": ".serena/memories/task_completion.md",
+      "type": "DELETED",
+      "added": 0,
+      "deleted": 8,
+      "lines": [
+        {
+          "start": 1,
+          "end": 8,
+          "type": "delete",
+          "author_type": "Human"
+        }
+      ]
+    },
+    {
+      "path": ".serena/memories/tech_stack.md",
+      "type": "DELETED",
+      "added": 0,
+      "deleted": 15,
+      "lines": [
+        {
+          "start": 1,
+          "end": 15,
+          "type": "delete",
+          "author_type": "Human"
+        }
+      ]
+    },
+    {
+      "path": ".serena/memories/telegram-bot-structure.md",
+      "type": "RENAMED",
+      "renamed_from": ".serena/memories/structure.md",
+      "added": 5,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 4,
+          "end": 4,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 16,
+          "end": 16,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 18,
+          "end": 18,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 22,
+          "end": 22,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 30,
+          "end": 30,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": ".serena/memories/telegram-bot-tech-stack.md",
+      "type": "ADDED",
+      "added": 17,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 1,
+          "end": 17,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": ".serena/memories/telegram-commands.md",
+      "type": "RENAMED",
+      "renamed_from": ".serena/memories/commands.md",
+      "added": 6,
+      "deleted": 2,
+      "lines": [
+        {
+          "start": 1,
+          "end": 1,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 2,
+          "end": 2,
+          "type": "delete",
+          "author_type": "Human"
+        },
+        {
+          "start": 6,
+          "end": 6,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 9,
+          "end": 9,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 11,
+          "end": 11,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 36,
+          "end": 36,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 38,
+          "end": 38,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 38,
+          "end": 38,
+          "type": "delete",
+          "author_type": "Human"
+        }
+      ]
+    },
+    {
+      "path": ".serena/memories/verification-checklist.md",
+      "type": "ADDED",
+      "added": 6,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 1,
+          "end": 6,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": ".serena/memories/wiki.md",
+      "type": "MODIFIED",
+      "added": 8,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 5,
+          "end": 5,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 7,
+          "end": 9,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 13,
+          "end": 14,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 16,
+          "end": 17,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "AGENTS.md",
+      "type": "MODIFIED",
+      "added": 12,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 9,
+          "end": 9,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 13,
+          "end": 14,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 21,
+          "end": 22,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 31,
+          "end": 31,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 37,
+          "end": 40,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 45,
+          "end": 46,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "README.md",
+      "type": "MODIFIED",
+      "added": 2,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 12,
+          "end": 12,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 22,
+          "end": 22,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "docs/wiki/00-index.md",
+      "type": "MODIFIED",
+      "added": 35,
+      "deleted": 1,
+      "lines": [
+        {
+          "start": 12,
+          "end": 13,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 17,
+          "end": 18,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 20,
+          "end": 21,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 36,
+          "end": 36,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 45,
+          "end": 45,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 51,
+          "end": 52,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 60,
+          "end": 61,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 63,
+          "end": 64,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 91,
+          "end": 107,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 107,
+          "end": 107,
+          "type": "delete",
+          "author_type": "Human"
+        },
+        {
+          "start": 108,
+          "end": 109,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 121,
+          "end": 121,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 126,
+          "end": 126,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "docs/wiki/09-comprehensive-code-wiki.md",
+      "type": "ADDED",
+      "added": 761,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 1,
+          "end": 761,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "docs/wiki/bot-configuration.md",
+      "type": "RENAMED",
+      "renamed_from": "docs/wiki/06-configuration.md",
+      "added": 15,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 10,
+          "end": 24,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "docs/wiki/framework-project-structure.md",
+      "type": "RENAMED",
+      "renamed_from": "docs/wiki/02-project-structure.md",
+      "added": 0,
+      "deleted": 0
+    },
+    {
+      "path": "docs/wiki/running-the-sample.md",
+      "type": "RENAMED",
+      "renamed_from": "docs/wiki/07-running.md",
+      "added": 11,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 14,
+          "end": 14,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 17,
+          "end": 17,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 69,
+          "end": 77,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "docs/wiki/telegram-bot-architecture.md",
+      "type": "RENAMED",
+      "renamed_from": "docs/wiki/01-architecture.md",
+      "added": 0,
+      "deleted": 0
+    }
+  ],
+  "generated_by": "blamely 0.1.0"
+}
