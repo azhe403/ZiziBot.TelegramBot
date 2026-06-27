@@ -1,0 +1,124 @@
+{
+  "schema": 2,
+  "commit": "aa936a4624907e3b62aa96d0febeef829cae58f9",
+  "branch": "main",
+  "base_sha": "8820f54f29eccd3ddaf1395bea4201d96f0a724d",
+  "message": "feat(framework): add bot engine configuration validator",
+  "totals": {
+    "ai_lines": 0,
+    "human_lines": 134,
+    "deleted_lines": 4,
+    "files": 4
+  },
+  "by_tool": {},
+  "by_gen_type": {
+    "chat": 0,
+    "cli": 0,
+    "completion": 0,
+    "human": 138
+  },
+  "files": [
+    {
+      "path": ".serena/memories/config-validation.md",
+      "type": "ADDED",
+      "added": 20,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 1,
+          "end": 20,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "ZiziBot.TelegramBot.Framework/Extensions/ClientExtension.cs",
+      "type": "MODIFIED",
+      "added": 10,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 14,
+          "end": 14,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 33,
+          "end": 33,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 88,
+          "end": 88,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 121,
+          "end": 121,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 140,
+          "end": 140,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 148,
+          "end": 152,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "ZiziBot.TelegramBot.Framework/Validation/BotEngineConfigValidator.cs",
+      "type": "ADDED",
+      "added": 103,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 1,
+          "end": 103,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "ZiziBot.TelegramBot.Sample/appsettings.Development.json",
+      "type": "MODIFIED",
+      "added": 1,
+      "deleted": 4,
+      "lines": [
+        {
+          "start": 22,
+          "end": 22,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 23,
+          "end": 26,
+          "type": "delete",
+          "author_type": "Human"
+        }
+      ]
+    }
+  ],
+  "generated_by": "blamely 0.1.0"
+}
