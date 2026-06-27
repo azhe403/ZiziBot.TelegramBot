@@ -1,0 +1,149 @@
+{
+  "schema": 2,
+  "commit": "c3c733cdee5ee8c0dd683be9477be65de9026921",
+  "branch": "main",
+  "base_sha": "aa936a4624907e3b62aa96d0febeef829cae58f9",
+  "message": "feat(framework): add bot connection and webhook health checks",
+  "totals": {
+    "ai_lines": 0,
+    "human_lines": 467,
+    "deleted_lines": 0,
+    "files": 7
+  },
+  "by_tool": {},
+  "by_gen_type": {
+    "chat": 0,
+    "cli": 0,
+    "completion": 0,
+    "human": 467
+  },
+  "files": [
+    {
+      "path": ".serena/memories/health-checks.md",
+      "type": "ADDED",
+      "added": 40,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 1,
+          "end": 40,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "ZiziBot.TelegramBot.Framework/Extensions/HealthChecksExtension.cs",
+      "type": "ADDED",
+      "added": 25,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 1,
+          "end": 25,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "ZiziBot.TelegramBot.Framework/HealthChecks/BotConnectionHealthCheck.cs",
+      "type": "ADDED",
+      "added": 66,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 1,
+          "end": 66,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "ZiziBot.TelegramBot.Framework/HealthChecks/BotWebhookHealthCheck.cs",
+      "type": "ADDED",
+      "added": 159,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 1,
+          "end": 159,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "ZiziBot.TelegramBot.Framework/Models/BotClientCollection.cs",
+      "type": "MODIFIED",
+      "added": 13,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 11,
+          "end": 12,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 110,
+          "end": 120,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "ZiziBot.TelegramBot.Sample/Program.cs",
+      "type": "MODIFIED",
+      "added": 12,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 1,
+          "end": 1,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 13,
+          "end": 16,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 24,
+          "end": 30,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "docs/wiki/10-health-checks.md",
+      "type": "ADDED",
+      "added": 152,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 1,
+          "end": 152,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    }
+  ],
+  "generated_by": "blamely 0.1.0"
+}
