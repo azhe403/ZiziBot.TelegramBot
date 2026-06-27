@@ -1,10 +1,10 @@
-﻿using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.Bot.Types.ReplyMarkups;
 using ZiziBot.TelegramBot.Framework.Attributes;
 using ZiziBot.TelegramBot.Framework.Models;
 
 namespace ZiziBot.TelegramBot.Sample.Commands;
 
-public class SampleCommands(CommandContext context) : BotCommandController
+public class SampleCommands : BotCommandController
 {
     [Command("ping")]
     [TextCommand("ping")]
