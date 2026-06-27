@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
 using ZiziBot.TelegramBot.Framework.Extensions;
 
@@ -9,11 +10,22 @@ builder.Services.AddSerilog(x => x
 
 builder.Services.AddZiziBotTelegramBot();
 
+// Add health checks
+builder.Services.AddHealthChecks()
+    .AddZiziBotTelegramBotHealthChecks();
+
 var app = builder.Build();
 
 app.UseHttpsRedirection();
 await app.UseZiziBotTelegramBot();
 
 app.MapGet("/", () => "OK!");
+
+// Add health check endpoints
+app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Name == "bot-connection"
+});
 
 await app.RunAsync();

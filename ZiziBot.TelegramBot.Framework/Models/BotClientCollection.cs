@@ -8,6 +8,8 @@ public class BotClientCollection
 
     public List<BotClientItem> Items { get; } = [];
 
+    public int Count => Items.Count;
+
     /// <summary>
     /// Checks whether a bot with the given <paramref name="name"/> is already registered.
     /// </summary>
@@ -103,6 +105,17 @@ public class BotClientCollection
         lock (gate)
         {
             return Items.Select(x => x.Name).ToList();
+        }
+    }
+
+    /// <summary>
+    /// Returns a snapshot of all bot client items safe for iteration.
+    /// </summary>
+    public IReadOnlyList<BotClientItem> GetAll()
+    {
+        lock (gate)
+        {
+            return Items.ToList();
         }
     }
 }
