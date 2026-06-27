@@ -1,0 +1,123 @@
+{
+  "schema": 2,
+  "commit": "01f4f40f36c8203cab060b570c71093608be111b",
+  "branch": "main",
+  "base_sha": "c3c733cdee5ee8c0dd683be9477be65de9026921",
+  "message": "refactor(framework): minor cleanups and inline query refactoring",
+  "totals": {
+    "ai_lines": 0,
+    "human_lines": 10,
+    "deleted_lines": 3,
+    "files": 4
+  },
+  "by_tool": {},
+  "by_gen_type": {
+    "chat": 0,
+    "cli": 0,
+    "completion": 0,
+    "human": 13
+  },
+  "files": [
+    {
+      "path": "ZiziBot.TelegramBot.Framework/Engines/BotWebhookEngine.cs",
+      "type": "MODIFIED",
+      "added": 1,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 78,
+          "end": 78,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "ZiziBot.TelegramBot.Framework/Handlers/BotUpdateHandler.cs",
+      "type": "MODIFIED",
+      "added": 4,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 245,
+          "end": 245,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 250,
+          "end": 250,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 307,
+          "end": 307,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 312,
+          "end": 312,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "ZiziBot.TelegramBot.Framework/Models/Context/CommandContext.Request.cs",
+      "type": "MODIFIED",
+      "added": 4,
+      "deleted": 3,
+      "lines": [
+        {
+          "start": 44,
+          "end": 44,
+          "type": "delete",
+          "author_type": "Human"
+        },
+        {
+          "start": 45,
+          "end": 46,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 48,
+          "end": 49,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 51,
+          "end": 52,
+          "type": "delete",
+          "author_type": "Human"
+        }
+      ]
+    },
+    {
+      "path": "ZiziBot.TelegramBot.Sample/Commands/InlineQueryCommands.cs",
+      "type": "MODIFIED",
+      "added": 1,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 7,
+          "end": 7,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    }
+  ],
+  "generated_by": "blamely 0.1.0"
+}
