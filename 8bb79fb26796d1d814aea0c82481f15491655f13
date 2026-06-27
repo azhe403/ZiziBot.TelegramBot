@@ -1,0 +1,38 @@
+{
+  "schema": 2,
+  "commit": "8bb79fb26796d1d814aea0c82481f15491655f13",
+  "branch": "main",
+  "base_sha": "a12d8f57890ce0f32bc650217ed6e4afce2e2086",
+  "message": "docs: formalize rule to always sync documentation and memories on change",
+  "totals": {
+    "ai_lines": 0,
+    "human_lines": 1,
+    "deleted_lines": 0,
+    "files": 1
+  },
+  "by_tool": {},
+  "by_gen_type": {
+    "chat": 0,
+    "cli": 0,
+    "completion": 0,
+    "human": 1
+  },
+  "files": [
+    {
+      "path": ".serena/memories/conventions.md",
+      "type": "MODIFIED",
+      "added": 1,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 14,
+          "end": 14,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    }
+  ],
+  "generated_by": "blamely 0.1.0"
+}
