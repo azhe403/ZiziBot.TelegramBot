@@ -1,0 +1,38 @@
+{
+  "schema": 2,
+  "commit": "66e108adadd9927e1da9f6df779ccc13c96332bf",
+  "branch": "main",
+  "base_sha": "f7e57470d49df6a4a03cd3661b3d1a1c5ff98f4b",
+  "message": "docs: add commit splitting rule to git-workflow memory",
+  "totals": {
+    "ai_lines": 0,
+    "human_lines": 1,
+    "deleted_lines": 0,
+    "files": 1
+  },
+  "by_tool": {},
+  "by_gen_type": {
+    "chat": 0,
+    "cli": 0,
+    "completion": 0,
+    "human": 1
+  },
+  "files": [
+    {
+      "path": ".serena/memories/git-workflow.md",
+      "type": "MODIFIED",
+      "added": 1,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 7,
+          "end": 7,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    }
+  ],
+  "generated_by": "blamely 0.1.0"
+}
