@@ -1,0 +1,52 @@
+{
+  "schema": 2,
+  "commit": "97ef4f4c2d52fb2bb628a8d7eb46aaf61fba3c85",
+  "branch": "main",
+  "base_sha": "e169d9434d033cfde6146664cd0b6c62adad22d6",
+  "message": "perf(framework): throttle TrackUpdate background calls to 5-second interval",
+  "totals": {
+    "ai_lines": 0,
+    "human_lines": 16,
+    "deleted_lines": 0,
+    "files": 1
+  },
+  "by_tool": {},
+  "by_gen_type": {
+    "chat": 0,
+    "cli": 0,
+    "completion": 0,
+    "human": 16
+  },
+  "files": [
+    {
+      "path": "ZiziBot.TelegramBot.Framework/Handlers/BotUpdateHandler.cs",
+      "type": "MODIFIED",
+      "added": 16,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 1,
+          "end": 1,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 28,
+          "end": 29,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 77,
+          "end": 89,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    }
+  ],
+  "generated_by": "blamely 0.1.0"
+}
