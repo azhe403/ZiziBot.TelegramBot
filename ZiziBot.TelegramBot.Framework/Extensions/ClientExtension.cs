@@ -11,6 +11,7 @@ using ZiziBot.TelegramBot.Framework.Interfaces;
 using ZiziBot.TelegramBot.Framework.Models;
 using ZiziBot.TelegramBot.Framework.Models.Configs;
 using ZiziBot.TelegramBot.Framework.Models.Enums;
+using ZiziBot.TelegramBot.Framework.Validation;
 
 namespace ZiziBot.TelegramBot.Framework.Extensions;
 
@@ -29,7 +30,7 @@ public static class ClientExtension
             static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
             {
                 if (assembly.IsDynamic)
-                    return Array.Empty<Type>();
+                    return [];
 
                 try
                 {
@@ -84,7 +85,7 @@ public static class ClientExtension
                 var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(ClientExtension).FullName ?? nameof(ClientExtension));
 
                 var internalEngineConfig = new BotEngineConfig();
-               
+
                 configuration.GetSection(BotEngineConfig.ConfigPath).Bind(internalEngineConfig);
 
                 internalEngineConfig.ActualEngineMode = internalEngineConfig.EngineMode switch
@@ -117,7 +118,7 @@ public static class ClientExtension
                 };
 
                 logger.LogInformation("Bot engine mode is {EngineMode}, actual mode is {ActualEngineMode}", engineConfig.EngineMode, engineConfig.ActualEngineMode);
-                
+
                 return engineConfig;
             });
         }
@@ -136,6 +137,7 @@ public static class ClientExtension
         services.AddSingleton<BotClientCollection>();
         services.AddScoped<BotUpdateHandler>();
         services.AddScoped<CommandContext>();
+        services.AddSingleton<BotEngineConfigValidator>();
 
         return services;
     }
@@ -143,7 +145,11 @@ public static class ClientExtension
     public static async Task<IApplicationBuilder> UseZiziBotTelegramBot(this IApplicationBuilder app)
     {
         var config = app.ApplicationServices.GetRequiredService<BotEngineConfig>();
-      
+        var validator = app.ApplicationServices.GetRequiredService<BotEngineConfigValidator>();
+
+        // Validate configuration before starting
+        validator.Validate(config);
+
         if (config.ActualEngineMode == BotEngineMode.Webhook)
             app.StartWebhookModeInternal();
 
