@@ -1,0 +1,275 @@
+{
+  "schema": 2,
+  "commit": "0e4e9845ed4b2ebe0eacb4c4c434b57d9439fc84",
+  "branch": "main",
+  "base_sha": "c55fd8b77c592fe04b2a6da06c996dcce58650a8",
+  "message": "docs: synchronize readme, agents guide, wiki, and serena memories for recent features",
+  "totals": {
+    "ai_lines": 0,
+    "human_lines": 124,
+    "deleted_lines": 2,
+    "files": 9
+  },
+  "by_tool": {},
+  "by_gen_type": {
+    "chat": 0,
+    "cli": 0,
+    "completion": 0,
+    "human": 126
+  },
+  "files": [
+    {
+      "path": ".serena/memories/conventions.md",
+      "type": "MODIFIED",
+      "added": 1,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 14,
+          "end": 14,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": ".serena/memories/core.md",
+      "type": "MODIFIED",
+      "added": 1,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 10,
+          "end": 10,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": ".serena/memories/features.md",
+      "type": "ADDED",
+      "added": 33,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 1,
+          "end": 33,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "AGENTS.md",
+      "type": "MODIFIED",
+      "added": 1,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 14,
+          "end": 14,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "README.md",
+      "type": "MODIFIED",
+      "added": 79,
+      "deleted": 2,
+      "lines": [
+        {
+          "start": 3,
+          "end": 3,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 6,
+          "end": 6,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 8,
+          "end": 8,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 10,
+          "end": 10,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 11,
+          "end": 11,
+          "type": "delete",
+          "author_type": "Human"
+        },
+        {
+          "start": 12,
+          "end": 12,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 12,
+          "end": 12,
+          "type": "delete",
+          "author_type": "Human"
+        },
+        {
+          "start": 14,
+          "end": 21,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 23,
+          "end": 23,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 25,
+          "end": 65,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 67,
+          "end": 67,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 69,
+          "end": 70,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 74,
+          "end": 93,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 95,
+          "end": 95,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "docs/wiki/03-framework-core.md",
+      "type": "MODIFIED",
+      "added": 3,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 24,
+          "end": 24,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 33,
+          "end": 33,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 42,
+          "end": 42,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "docs/wiki/05-engines-webhook-polling.md",
+      "type": "MODIFIED",
+      "added": 2,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 22,
+          "end": 22,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 28,
+          "end": 28,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "docs/wiki/09-comprehensive-code-wiki.md",
+      "type": "MODIFIED",
+      "added": 2,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 178,
+          "end": 178,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 190,
+          "end": 190,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "docs/wiki/bot-configuration.md",
+      "type": "MODIFIED",
+      "added": 2,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 26,
+          "end": 27,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    }
+  ],
+  "generated_by": "blamely 0.1.0"
+}
