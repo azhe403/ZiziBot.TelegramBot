@@ -59,7 +59,7 @@ public class BotPollingEngine(
             }
             catch (ArgumentException argumentException) when (argumentException.Message.Contains("Bot token invalid"))
             {
-                logger.LogError("Bot token invalid for bot: {BotName}. Please check your configuration.", botTokenConfig.Name);
+                logger.LogError(argumentException, "Bot token invalid for bot: {BotName}. Please check your configuration.", botTokenConfig.Name);
             }
             catch (Exception exception)
             {
