@@ -21,7 +21,7 @@ Key responsibilities:
 
 File: [IBotEngine.cs](../../ZiziBot.TelegramBot.Framework/Interfaces/IBotEngine.cs#L5-L12)
 
-Defines the minimal API used by the host to start the bot engine.
+Defines the minimal API used by the host to start and stop the bot engine, including `StopEngine()`.
 
 ### `BotPollingEngine`
 
@@ -30,6 +30,7 @@ File: [BotPollingEngine.cs](../../ZiziBot.TelegramBot.Framework/Engines/BotPolli
 - Creates `TelegramBotClient` instances from configured tokens.
 - Calls `StartReceiving(...)` and wires updates into [BotEngineHandler.UpdateHandler](../../ZiziBot.TelegramBot.Framework/Handlers/BotEngineHandler.cs#L21-L49).
 - Stores created clients in [BotClientCollection](../../ZiziBot.TelegramBot.Framework/Models/BotClientCollection.cs#L5-L108).
+- Implements `StopEngine()` to gracefully cancel all long-polling tasks using the active cancellation tokens.
 
 ### `BotWebhookEngine`
 
@@ -38,6 +39,7 @@ File: [BotWebhookEngine.cs](../../ZiziBot.TelegramBot.Framework/Engines/BotWebho
 - Requires `BotEngine:WebhookUrl`.
 - Builds webhook URLs using [ValueConst.WebHookPath](../../ZiziBot.TelegramBot.Framework/Models/Constants/ValueConst.cs#L3-L6) and optional `WebhookKey`.
 - Supports hiding the bot token in the URL by using the bot name segment when `UseBotTokenInWebhookPath=false`. See [BotWebhookEngine.cs](../../ZiziBot.TelegramBot.Framework/Engines/BotWebhookEngine.cs#L47-L50).
+- Implements `StopEngine()` to safely delete registered webhooks from Telegram API on application shutdown.
 
 ## Update Handling Pipeline
 

@@ -11,4 +11,4 @@
 - Do not commit real bot tokens, webhook keys, or other secrets to the repository
 - Prefer environment variables for local configuration
 - Add XML documentation comments to public APIs in the framework library
-- Update AGENTS.md and wiki documentation when adding new framework features
+- Always synchronize documentation (README.md, AGENTS.md, docs/wiki/, and Serena memories) whenever framework features or changes are introduced.

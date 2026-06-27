@@ -11,7 +11,7 @@ This file is for coding agents (and contributors) working in this repository. It
 ## Start Here (Docs)
 
 - Code wiki entry point: `docs/wiki/00-index.md`
-- Serena project notes: `.serena/memories/` (including `wiki.md`, `core.md`, `conventions.md`, `new-features.md`)
+- Serena project notes: `.serena/memories/` (including `wiki.md`, `core.md`, `conventions.md`, `features.md`)
 
 ## Key Entry Points
 

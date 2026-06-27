@@ -9,13 +9,13 @@ Use this index page as the entry point for understanding the codebase and runtim
 
 ## Wiki Pages
 
-- Architecture overview: [telegram-bot-architecture.md](./telegram-bot-architecture.md)
-- Project structure & module responsibilities: [framework-project-structure.md](./framework-project-structure.md)
+- Architecture overview: [01-telegram-bot-architecture.md](./01-telegram-bot-architecture.md)
+- Project structure & module responsibilities: [02-framework-project-structure.md](./02-framework-project-structure.md)
 - Framework core (key types): [03-framework-core.md](./03-framework-core.md)
 - Routing & middleware: [04-routing-and-middleware.md](./04-routing-and-middleware.md)
 - Engines (webhook vs polling): [05-engines-webhook-polling.md](./05-engines-webhook-polling.md)
-- Configuration: [bot-configuration.md](./bot-configuration.md)
-- Running the project: [running-the-sample.md](./running-the-sample.md)
+- Configuration: [06-bot-configuration.md](./06-bot-configuration.md)
+- Running the project: [07-running-the-sample.md](./07-running-the-sample.md)
 - Dependency map: [08-dependency-map.md](./08-dependency-map.md)
 - Consolidated reference: [09-comprehensive-code-wiki.md](./09-comprehensive-code-wiki.md)
 - Health checks: [10-health-checks.md](./10-health-checks.md)
@@ -118,7 +118,7 @@ Reference diagram: [08-dependency-map.md](./08-dependency-map.md)
 
 ## Running the Project
 
-See the detailed guide: [running-the-sample.md](./running-the-sample.md).
+See the detailed guide: [07-running-the-sample.md](./07-running-the-sample.md).
 
 Quick start:
 

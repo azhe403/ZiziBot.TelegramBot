@@ -23,6 +23,8 @@ Validation is implemented in [BotEngineConfigValidator](../../ZiziBot.TelegramBo
 
 If validation fails, the application will throw an `InvalidOperationException` with detailed error messages during startup.
 
+In addition to static startup checks, if a syntactically valid token is later rejected by the underlying client library during startup initialization, the polling engine catches `ArgumentException` and logs the full exception diagnostics to assist with troubleshooting.
+
 ## `BotEngineConfig` Fields
 
 Source: [BotEngineConfig](../../ZiziBot.TelegramBot.Framework/Models/Configs/BotEngineConfig.cs#L5-L18)

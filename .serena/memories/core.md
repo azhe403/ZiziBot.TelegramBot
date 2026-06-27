@@ -7,5 +7,6 @@
 - For sample implementation details, read `mem:sample-core`
 - For command patterns, read `mem:telegram-commands`
 - For verification steps, read `mem:verification-checklist`
+- For new features (config validation, health checks, stop engine, throttled update tracking), read `mem:features`
 - Human-facing architecture docs live in `docs/wiki/*.md`; source files are the source of truth if docs drift
 - Build commands: `dotnet build ZiziBot.TelegramBot.slnx` and `dotnet run --project .\ZiziBot.TelegramBot.Sample`

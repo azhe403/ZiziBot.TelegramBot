@@ -19,11 +19,13 @@ What it does:
 - Starts `StartReceiving(...)` with:
   - update handler: [BotEngineHandler.UpdateHandler](../../ZiziBot.TelegramBot.Framework/Handlers/BotEngineHandler.cs#L21-L49)
   - error handler: [BotPollingEngine.ErrorHandler](../../ZiziBot.TelegramBot.Framework/Engines/BotPollingEngine.cs#L99-L103)
+- Catch `ArgumentException` during bot startup (when the bot token is invalid according to WTelegramBot client library) and logs the full exception diagnostics.
 - Registers running clients in [BotClientCollection](../../ZiziBot.TelegramBot.Framework/Models/BotClientCollection.cs#L5-L108)
 
 Stop behavior:
 
 - Cancels the per-bot `CancellationTokenSource` when removing from the collection: [BotPollingEngine.Stop](../../ZiziBot.TelegramBot.Framework/Engines/BotPollingEngine.cs#L71-L78)
+- Implements `StopEngine()` to gracefully cancel all active polling cancellation tokens on host shutdown.
 
 ## Webhook Engine
 

@@ -175,6 +175,7 @@ Responsibilities:
 - Calls `StartReceiving(...)` on each bot client.
 - Uses `BotEngineHandler.UpdateHandler` as the shared callback for incoming updates.
 - Supports stopping individual bots by cancelling their `CancellationTokenSource`.
+- Implements `StopEngine()` to gracefully cancel all active polling cancellation tokens on host shutdown.
 
 `BotWebhookEngine`:
 
@@ -186,6 +187,7 @@ Responsibilities:
   - either bot token or bot name, based on `UseBotTokenInWebhookPath`
 - Calls `SetWebhook(...)` for each configured bot.
 - Stops bots by deleting their webhook registrations.
+- Implements `StopEngine()` to delete registered webhooks from Telegram API on host shutdown.
 
 ### Webhook Endpoint Layer
 
