@@ -1,11 +1,10 @@
-- # Suggested Commands
+# Suggested Commands
 
-- Build (repo root): `dotnet build` (or `dotnet build -c Release`).
-- Run sample host:
-  - `cd ZiziBot.TelegramBot.Sample`
-  - `dotnet run`
-- Pack (NuGet package for framework, repo root): `dotnet pack -c Release`.
-- CI parity (publish workflow): `dotnet restore` -> `dotnet build -c Release` -> `dotnet pack -c Release`.
-- No test projects currently; if added later: `dotnet test` at repo root.
-- Troubleshooting SDK mismatch:
-  - Ensure .NET 10 SDK installed for the sample (`net10.0`).
+- Repo root restore/build: `dotnet restore ZiziBot.TelegramBot.slnx` then `dotnet build ZiziBot.TelegramBot.slnx -c Debug`.
+- Run sample host from repo root: `dotnet run --project ZiziBot.TelegramBot.Sample/ZiziBot.TelegramBot.Sample.csproj`.
+- Build framework only: `dotnet build ZiziBot.TelegramBot.Framework/ZiziBot.TelegramBot.Framework.csproj`.
+- Create NuGet package: `dotnet pack ZiziBot.TelegramBot.Framework/ZiziBot.TelegramBot.Framework.csproj`.
+- Useful Windows shell equivalents when a command must be run outside agent tools:
+  - list matching files: `Get-ChildItem -Recurse -Filter *.csproj`
+  - search file content: `Select-String -Path **\*.cs -Pattern "SomePattern"`
+  - remove a file/tree: `Remove-Item <path> -Recurse -Force`

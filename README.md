@@ -9,6 +9,7 @@ Command-based Telegram bot framework + sample host.
 
 - Contributor/agent guide: [AGENTS.md](./AGENTS.md)
 - Code wiki (start here): [docs/wiki/00-index.md](./docs/wiki/00-index.md)
+- Health checks: [docs/wiki/10-health-checks.md](./docs/wiki/10-health-checks.md)
 
 ## Projects
 
@@ -18,7 +19,7 @@ Command-based Telegram bot framework + sample host.
 ## Quick Start
 
 ```powershell
-dotnet build
+dotnet build ZiziBot.TelegramBot.slnx
 dotnet run --project .\ZiziBot.TelegramBot.Sample
 ```
 

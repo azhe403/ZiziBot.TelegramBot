@@ -1,15 +1,14 @@
-﻿
-# Adding a New Command
+﻿# Adding a New Command
 
 To add a new command, you can create a new class that inherits from `BotCommandController` and add methods with the `[Command]` attribute. For example:
 
 ```csharp
-public class SampleCommands : BotCommandController
+public class SampleCommands(CommandContext context) : BotCommandController
 {
     [Command("ping")]
-    public async Task Ping()
+    public async Task PingCommand()
     {
-        await SendMessageText("Pong!");
+        await SendMessage("Pong!");
     }
 }
 ```
@@ -34,7 +33,6 @@ The `BotCommandController` base class provides a `Context` property that allows 
 
 The `BotCommandController` base class provides several methods for sending responses:
 
--   `SendMessageText(...)`: Sends a text message.
--   `SendMessage(...)`: Sends a message with more options, such as a reply markup.
+-   `SendMessage(...)`: Sends a text message with optional reply markup.
 -   `AnswerCallbackQuery(...)`: Answers a callback query.
 -   `AnswerInlineQuery(...)`: Answers an inline query.

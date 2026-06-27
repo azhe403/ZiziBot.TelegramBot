@@ -1,10 +1,9 @@
- # Sample Core
-
 Sample module: `ZiziBot.TelegramBot.Sample/` (ASP.NET Core minimal host).
 
 Startup:
-- `Program.cs` wires logging (Serilog), then calls `AddZiziBotTelegramBot()` and `UseZiziBotTelegramBot()`.
+- `Program.cs` wires logging (Serilog), registers health checks, then calls `AddZiziBotTelegramBot()` and `UseZiziBotTelegramBot()`.
 - Exposes `GET /` => `OK!`.
+- Health check endpoints: `/health` (all checks) and `/health/ready` (readiness probe - bot connection only).
 
 Examples:
 - Commands in `Commands/` show:

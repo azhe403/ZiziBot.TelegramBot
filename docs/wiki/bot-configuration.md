@@ -7,7 +7,21 @@ The framework binds configuration from the `BotEngine` section using:
 - `BotEngineConfig.ConfigPath = "BotEngine"`: [BotEngineConfig](../../ZiziBot.TelegramBot.Framework/Models/Configs/BotEngineConfig.cs#L5-L18)
 - `BotTokenConfig.ConfigPath = "BotEngine:Bot"`: [BotTokenConfig](../../ZiziBot.TelegramBot.Framework/Models/Configs/BotTokenConfig.cs#L3-L9)
 
-Binding logic is in [ClientExtension](../../ZiziBot.TelegramBot.Framework/Extensions/ClientExtension.cs#L70-L100).
+Binding logic is in [ClientExtension](../../ZiziBot.TelegramBot.Framework/Extensions/ClientExtension.cs#L71-L101).
+
+## Configuration Validation
+
+The framework automatically validates configuration during startup via `UseZiziBotTelegramBot()`. Validation checks:
+
+- At least one bot token is configured
+- Bot names are unique and non-empty
+- Bot tokens match the Telegram token format (`\d+:[A-Za-z0-9_-]{35}`)
+- Webhook URL is valid HTTPS when in webhook mode
+- Webhook URL is provided when in webhook mode
+
+Validation is implemented in [BotEngineConfigValidator](../../ZiziBot.TelegramBot.Framework/Validation/BotEngineConfigValidator.cs#L1-L107).
+
+If validation fails, the application will throw an `InvalidOperationException` with detailed error messages during startup.
 
 ## `BotEngineConfig` Fields
 

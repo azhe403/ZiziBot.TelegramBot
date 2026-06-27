@@ -9,14 +9,16 @@ Use this index page as the entry point for understanding the codebase and runtim
 
 ## Wiki Pages
 
-- Architecture overview: [01-architecture.md](./01-architecture.md)
-- Project structure & module responsibilities: [02-project-structure.md](./02-project-structure.md)
+- Architecture overview: [telegram-bot-architecture.md](./telegram-bot-architecture.md)
+- Project structure & module responsibilities: [framework-project-structure.md](./framework-project-structure.md)
 - Framework core (key types): [03-framework-core.md](./03-framework-core.md)
 - Routing & middleware: [04-routing-and-middleware.md](./04-routing-and-middleware.md)
 - Engines (webhook vs polling): [05-engines-webhook-polling.md](./05-engines-webhook-polling.md)
-- Configuration: [06-configuration.md](./06-configuration.md)
-- Running the project: [07-running.md](./07-running.md)
+- Configuration: [bot-configuration.md](./bot-configuration.md)
+- Running the project: [running-the-sample.md](./running-the-sample.md)
 - Dependency map: [08-dependency-map.md](./08-dependency-map.md)
+- Consolidated reference: [09-comprehensive-code-wiki.md](./09-comprehensive-code-wiki.md)
+- Health checks: [10-health-checks.md](./10-health-checks.md)
 
 ## Executive Summary
 
@@ -31,7 +33,7 @@ At runtime the system follows this flow:
 
 Key entry points:
 
-- Sample host entry point: [Program.cs](../../ZiziBot.TelegramBot.Sample/Program.cs#L1-L19)
+- Sample host entry point: [Program.cs](../../ZiziBot.TelegramBot.Sample/Program.cs#L1-L31) (includes health check registration)
 - DI + engine selection + startup: [ClientExtension](../../ZiziBot.TelegramBot.Framework/Extensions/ClientExtension.cs#L17-L165)
 - Update routing + middleware + invocation: [BotUpdateHandler](../../ZiziBot.TelegramBot.Framework/Handlers/BotUpdateHandler.cs#L18-L489)
 - Polling engine: [BotPollingEngine](../../ZiziBot.TelegramBot.Framework/Engines/BotPollingEngine.cs#L11-L104)
@@ -40,12 +42,14 @@ Key entry points:
 
 ### Major Modules (Framework)
 
-- `Extensions/`: Composition root (DI wiring, config binding, engine selection) + webhook endpoint mapping.
+- `Extensions/`: Composition root (DI wiring, config binding, engine selection) + webhook endpoint mapping + health checks.
 - `Engines/`: “Ingress adapters” for Telegram updates (polling receiver vs webhook registration).
 - `Handlers/`: Update processing pipeline (per-update DI scope, routing, middleware, invocation).
 - `Attributes/`: Declarative routing and middleware selection attributes.
 - `Models/`: Context, config models, command info, and multi-bot runtime state.
 - `Interfaces/`: Engine and middleware contracts.
+- `Validation/`: Configuration validation services.
+- `HealthChecks/`: Health check implementations for bot connection and webhook status.
 
 ## Key Classes & Methods (Quick Reference)
 
@@ -53,10 +57,11 @@ Key entry points:
 
 - `ClientExtension.AddZiziBotTelegramBot(IServiceCollection, IConfiguration?, BotEngineConfig?)`
   - Registers framework services, binds config, discovers controllers/middlewares, and selects an `IBotEngine`.
-  - Implementation: [ClientExtension.cs](../../ZiziBot.TelegramBot.Framework/Extensions/ClientExtension.cs#L22-L141)
+  - Also registers configuration validation service.
+  - Implementation: [ClientExtension.cs](../../ZiziBot.TelegramBot.Framework/Extensions/ClientExtension.cs#L23-L143)
 - `ClientExtension.UseZiziBotTelegramBot(WebApplication)`
-  - Maps webhook endpoints (webhook mode only) and starts the selected engine.
-  - Implementation: [ClientExtension.cs](../../ZiziBot.TelegramBot.Framework/Extensions/ClientExtension.cs#L143-L164)
+  - Validates configuration, maps webhook endpoints (webhook mode only), and starts the selected engine.
+  - Implementation: [ClientExtension.cs](../../ZiziBot.TelegramBot.Framework/Extensions/ClientExtension.cs#L145-L159)
 
 ### Update Pipeline
 
@@ -83,6 +88,25 @@ Key entry points:
   - Maps POST routes under `api/telegram-webhook` and forwards updates to `BotEngineHandler.UpdateHandler`.
   - Implementation: [EndpointExtension.cs](../../ZiziBot.TelegramBot.Framework/Extensions/EndpointExtension.cs#L18-L143)
 
+### Configuration Validation
+
+- `BotEngineConfigValidator.Validate(BotEngineConfig)`
+  - Validates bot tokens, webhook configuration, and engine mode settings at startup.
+  - Throws `InvalidOperationException` with detailed error messages on validation failure.
+  - Implementation: [BotEngineConfigValidator.cs](../../ZiziBot.TelegramBot.Framework/Validation/BotEngineConfigValidator.cs#L1-L107)
+
+### Health Checks
+
+- `HealthChecksExtension.AddZiziBotTelegramBotHealthChecks(IHealthChecksBuilder, string?, string?)`
+  - Registers bot connection and webhook health checks.
+  - Implementation: [HealthChecksExtension.cs](../../ZiziBot.TelegramBot.Framework/Extensions/HealthChecksExtension.cs#L1-L25)
+- `BotConnectionHealthCheck.CheckHealthAsync(HealthCheckContext, CancellationToken)`
+  - Tests bot connectivity via `GetMe()` API calls.
+  - Implementation: [BotConnectionHealthCheck.cs](../../ZiziBot.TelegramBot.Framework/HealthChecks/BotConnectionHealthCheck.cs#L1-L65)
+- `BotWebhookHealthCheck.CheckHealthAsync(HealthCheckContext, CancellationToken)`
+  - Monitors webhook status, pending updates, and errors.
+  - Implementation: [BotWebhookHealthCheck.cs](../../ZiziBot.TelegramBot.Framework/HealthChecks/BotWebhookHealthCheck.cs#L1-L159)
+
 ## Dependency Relationships (Layering)
 
 The high-level dependency direction is:
@@ -94,14 +118,13 @@ Reference diagram: [08-dependency-map.md](./08-dependency-map.md)
 
 ## Running the Project
 
-See the detailed guide: [07-running.md](./07-running.md).
+See the detailed guide: [running-the-sample.md](./running-the-sample.md).
 
 Quick start:
 
 ```powershell
-dotnet build
+dotnet build ZiziBot.TelegramBot.slnx
 dotnet run --project .\ZiziBot.TelegramBot.Sample
 ```
 
 The bot requires at least one token under `BotEngine:Bot`. Prefer environment variables; do not commit real tokens.
-

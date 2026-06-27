@@ -11,10 +11,10 @@
 From the repository root:
 
 ```powershell
-dotnet build
+dotnet build ZiziBot.TelegramBot.slnx
 ```
 
-Reference: [README.md](../../README.md#L57-L62).
+Reference: [README.md](../../README.md#L19-L23).
 
 ## Run the Sample Host (Recommended)
 
@@ -66,3 +66,12 @@ The sample project includes command controllers demonstrating the routing model:
 - `/ping`, `/start`, `/say`, default command, callbacks: [SampleCommands](../../ZiziBot.TelegramBot.Sample/Commands/SampleCommands.cs#L7-L64)
 - Inline query handlers: [InlineQueryCommands](../../ZiziBot.TelegramBot.Sample/Commands/InlineQueryCommands.cs#L7-L39)
 - Message/update type handlers: [EventCommands](../../ZiziBot.TelegramBot.Sample/Commands/EventCommands.cs#L7-L20)
+
+## Health Checks
+
+The sample project includes health check endpoints for monitoring:
+
+- `/health` - All health checks (bot connection + webhook)
+- `/health/ready` - Readiness probe (bot connection only)
+
+See [10-health-checks.md](./10-health-checks.md) for detailed health check documentation.

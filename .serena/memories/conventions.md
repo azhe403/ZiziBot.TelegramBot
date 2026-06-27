@@ -1,19 +1,13 @@
-- # Conventions
+# Conventions
 
-- Commands:
-  - Implement as classes inheriting `BotCommandController`.
-  - Route by attributes on methods: `[Command]`, `[TextCommand]`, `[TypedCommand]`, `[UpdateCommand]`, `[InlineQuery]`, `[Callback]`, `[DefaultCommand]`.
-  - Controllers are constructed via `ActivatorUtilities.CreateInstance`; constructor DI is supported.
-  - Prefer using `Context` + controller helper wrappers (`SendMessage`, `AnswerCallbackQuery`, `AnswerInlineQuery`) instead of reaching into Telegram client directly.
-- Middleware:
-  - Implement `IBeforeCommand` and call `next(commandContext)` to pass; skipping it cancels command invocation.
-  - Implement `IAfterCommand` for post-invocation work.
-  - Disable middleware by annotating the class with `[DisabledMiddleware]` or listing its class name in `BotEngine.DisabledMiddleware`.
-- Configuration:
-  - Binding paths are `BotEngine` (`BotEngineConfig.ConfigPath`) and `BotEngine:Bot` (`BotTokenConfig.ConfigPath`).
-  - Important pitfall: sample `appsettings.Development.json` uses `ReplyStrategy`/`ExecutionStrategy`, but the model properties are `ReplyMode`/`ExecutionMode`.
-- Routing behavior (non-obvious):
-  - Message routing checks in order: `[Command]` -> `[TextCommand]` -> `[TypedCommand]` -> `[DefaultCommand]`.
-  - Inline query fallback: if no command match, falls back to any `[InlineQuery]`.
-  - Callback fallback: falls back to `[Callback]` with empty command.
-  - `ComparisonMode` enum has more values than currently implemented in router’s `TextCommand` switch.
+- Follow existing framework patterns: DI via `AddZiziBotTelegramBot()`, routing via attributes on `BotCommandController` subclasses
+- Keep extension methods focused: configuration validation and health checks are implemented as separate services
+- Use constructor injection with primary constructor syntax where appropriate
+- Maintain cognitive complexity below thresholds by extracting complex methods into smaller, focused functions
+- Repo-level formatting defaults: LF line endings, UTF-8, trimmed trailing whitespace, file-scoped namespaces in C#, 4-space indentation for `.cs`, 2-space indentation for JSON
+- ReSharper settings prefer explicit object creation types when the type is not obvious
+- Use `.slnx` for solution-level work (canonical solution file). The legacy `.sln` still exists but should not be used for new work.
+- Do not commit real bot tokens, webhook keys, or other secrets to the repository
+- Prefer environment variables for local configuration
+- Add XML documentation comments to public APIs in the framework library
+- Update AGENTS.md and wiki documentation when adding new framework features
