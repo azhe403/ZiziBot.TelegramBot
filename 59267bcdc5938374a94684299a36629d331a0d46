@@ -1,0 +1,79 @@
+{
+  "schema": 2,
+  "commit": "59267bcdc5938374a94684299a36629d331a0d46",
+  "branch": "main",
+  "base_sha": "97ef4f4c2d52fb2bb628a8d7eb46aaf61fba3c85",
+  "message": "refactor(validation): introduce shared RegexHelper with source generated Regex",
+  "totals": {
+    "ai_lines": 0,
+    "human_lines": 17,
+    "deleted_lines": 6,
+    "files": 2
+  },
+  "by_tool": {},
+  "by_gen_type": {
+    "chat": 0,
+    "cli": 0,
+    "completion": 0,
+    "human": 23
+  },
+  "files": [
+    {
+      "path": "ZiziBot.TelegramBot.Framework/Helpers/RegexHelper.cs",
+      "type": "ADDED",
+      "added": 14,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 1,
+          "end": 14,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "ZiziBot.TelegramBot.Framework/Validation/BotEngineConfigValidator.cs",
+      "type": "MODIFIED",
+      "added": 3,
+      "deleted": 6,
+      "lines": [
+        {
+          "start": 1,
+          "end": 1,
+          "type": "delete",
+          "author_type": "Human"
+        },
+        {
+          "start": 2,
+          "end": 2,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 68,
+          "end": 68,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 91,
+          "end": 91,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 92,
+          "end": 96,
+          "type": "delete",
+          "author_type": "Human"
+        }
+      ]
+    }
+  ],
+  "generated_by": "blamely 0.1.0"
+}
