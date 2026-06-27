@@ -4,7 +4,7 @@ using ZiziBot.TelegramBot.Framework.Models;
 
 namespace ZiziBot.TelegramBot.Sample.Commands;
 
-public class InlineQueryCommands(CommandContext context) : BotCommandController
+public class InlineQueryCommands : BotCommandController
 {
     [InlineQuery]
     public async Task InlineQueryCommand()

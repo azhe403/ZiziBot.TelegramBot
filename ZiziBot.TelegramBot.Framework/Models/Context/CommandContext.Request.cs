@@ -41,15 +41,15 @@ public partial class CommandContext
         return await BotClient.SendMessage(
             chatId: Chat,
             text: text,
-            messageThreadId: messageThreadId,
             parseMode: parseMode,
-            entities: entities,
+            replyParameters: replyParameters,
+            replyMarkup: replyMarkup,
             linkPreviewOptions: linkPreviewOptions,
+            messageThreadId: messageThreadId,
+            entities: entities,
             disableNotification: disableNotification,
             protectContent: protectContent,
             messageEffectId: messageEffectId,
-            replyParameters: replyParameters,
-            replyMarkup: replyMarkup,
             businessConnectionId: businessConnectionId,
             cancellationToken: cancellationToken
         );

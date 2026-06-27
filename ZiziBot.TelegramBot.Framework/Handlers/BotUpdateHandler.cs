@@ -242,12 +242,12 @@ public class BotUpdateHandler(
         {
             var beforeCommands = provider.GetServices<IBeforeCommand>()
                 .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
-                .Where(x => botEngineConfig.DisabledMiddleware?.Contains(x.GetType().Name) != true)
+                .Where(x => botEngineConfig.DisabledMiddleware?.Contains(x.GetType().Name) is not true)
                 .Where(x =>
                 {
                     var middlewareFilter = x.GetType().GetCustomAttributes<MiddlewareFilterAttribute>();
                     var middlewareFilters = middlewareFilter as MiddlewareFilterAttribute[] ?? middlewareFilter.ToArray();
-                    
+
                     if (middlewareFilters.Any())
                         return middlewareFilters.Any(y => y.UpdateType == commandContext.Update?.Type);
 
@@ -304,12 +304,12 @@ public class BotUpdateHandler(
         {
             var afterCommands = provider.GetServices<IAfterCommand>()
                 .Where(x => x.GetType().GetCustomAttribute<DisabledMiddlewareAttribute>() == null)
-                .Where(x => botEngineConfig.DisabledMiddleware?.Contains(x.GetType().Name) != true)
+                .Where(x => botEngineConfig.DisabledMiddleware?.Contains(x.GetType().Name) is not true)
                 .Where(x =>
                 {
                     var middlewareFilter = x.GetType().GetCustomAttributes<MiddlewareFilterAttribute>();
                     var middlewareFilters = middlewareFilter as MiddlewareFilterAttribute[] ?? middlewareFilter.ToArray();
-                    
+
                     if (middlewareFilters.Any())
                         return middlewareFilters.Any(y => y.UpdateType == commandContext.Update?.Type);
 

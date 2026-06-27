@@ -75,7 +75,7 @@ public class BotWebhookEngine(
     {
         if (!botClientCollection.TryRemoveByName(name, out var client))
             return Task.CompletedTask;
-        
+
         return client!.Client.DeleteWebhook();
     }
 
