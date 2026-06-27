@@ -1,0 +1,38 @@
+{
+  "schema": 2,
+  "commit": "c55fd8b77c592fe04b2a6da06c996dcce58650a8",
+  "branch": "main",
+  "base_sha": "f36c6cdf727bde0bdeddab2c7f3d7e11aa1f6e44",
+  "message": "fix(engine): include exception in invalid bot token log",
+  "totals": {
+    "ai_lines": 0,
+    "human_lines": 1,
+    "deleted_lines": 0,
+    "files": 1
+  },
+  "by_tool": {},
+  "by_gen_type": {
+    "chat": 0,
+    "cli": 0,
+    "completion": 0,
+    "human": 1
+  },
+  "files": [
+    {
+      "path": "ZiziBot.TelegramBot.Framework/Engines/BotPollingEngine.cs",
+      "type": "MODIFIED",
+      "added": 1,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 62,
+          "end": 62,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    }
+  ],
+  "generated_by": "blamely 0.1.0"
+}
