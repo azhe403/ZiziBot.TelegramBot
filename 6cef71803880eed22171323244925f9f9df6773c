@@ -1,0 +1,38 @@
+{
+  "schema": 2,
+  "commit": "6cef71803880eed22171323244925f9f9df6773c",
+  "branch": "main",
+  "base_sha": "66e108adadd9927e1da9f6df779ccc13c96332bf",
+  "message": "docs: add default commit policy to git-workflow memory",
+  "totals": {
+    "ai_lines": 0,
+    "human_lines": 2,
+    "deleted_lines": 0,
+    "files": 1
+  },
+  "by_tool": {},
+  "by_gen_type": {
+    "chat": 0,
+    "cli": 0,
+    "completion": 0,
+    "human": 2
+  },
+  "files": [
+    {
+      "path": ".serena/memories/git-workflow.md",
+      "type": "MODIFIED",
+      "added": 2,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 7,
+          "end": 8,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    }
+  ],
+  "generated_by": "blamely 0.1.0"
+}
