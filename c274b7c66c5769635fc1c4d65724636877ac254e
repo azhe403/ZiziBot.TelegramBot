@@ -1,0 +1,45 @@
+{
+  "schema": 2,
+  "commit": "c274b7c66c5769635fc1c4d65724636877ac254e",
+  "branch": "main",
+  "base_sha": "f7e57470d49df6a4a03cd3661b3d1a1c5ff98f4b",
+  "message": "fix(sample): resolve CS9113 compiler warning in SampleCommands",
+  "totals": {
+    "ai_lines": 0,
+    "human_lines": 2,
+    "deleted_lines": 0,
+    "files": 1
+  },
+  "by_tool": {},
+  "by_gen_type": {
+    "chat": 0,
+    "cli": 0,
+    "completion": 0,
+    "human": 2
+  },
+  "files": [
+    {
+      "path": "ZiziBot.TelegramBot.Sample/Commands/SampleCommands.cs",
+      "type": "MODIFIED",
+      "added": 2,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 1,
+          "end": 1,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 7,
+          "end": 7,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    }
+  ],
+  "generated_by": "blamely 0.1.0"
+}
