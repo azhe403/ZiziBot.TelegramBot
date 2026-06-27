@@ -1,0 +1,38 @@
+{
+  "schema": 2,
+  "commit": "9e47554c5bfdcf19260dc8bf102277ff1601c54c",
+  "branch": "main",
+  "base_sha": "f7e57470d49df6a4a03cd3661b3d1a1c5ff98f4b",
+  "message": "docs: update git-workflow memory to commit automatically unless asked not to",
+  "totals": {
+    "ai_lines": 0,
+    "human_lines": 1,
+    "deleted_lines": 0,
+    "files": 1
+  },
+  "by_tool": {},
+  "by_gen_type": {
+    "chat": 0,
+    "cli": 0,
+    "completion": 0,
+    "human": 1
+  },
+  "files": [
+    {
+      "path": ".serena/memories/git-workflow.md",
+      "type": "MODIFIED",
+      "added": 1,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 7,
+          "end": 7,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    }
+  ],
+  "generated_by": "blamely 0.1.0"
+}
