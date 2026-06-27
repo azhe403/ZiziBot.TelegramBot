@@ -1,0 +1,74 @@
+{
+  "schema": 2,
+  "commit": "e9c8e8d7c597cc4dd2edd59f12a972145c2b0940",
+  "branch": "main",
+  "base_sha": "344267a7ed62b6bb72180c3101760b75f74217cd",
+  "message": "docs: document StopEngine and graceful shutdown behavior in wiki",
+  "totals": {
+    "ai_lines": 0,
+    "human_lines": 5,
+    "deleted_lines": 0,
+    "files": 2
+  },
+  "by_tool": {},
+  "by_gen_type": {
+    "chat": 0,
+    "cli": 0,
+    "completion": 0,
+    "human": 5
+  },
+  "files": [
+    {
+      "path": "docs/wiki/03-framework-core.md",
+      "type": "MODIFIED",
+      "added": 3,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 24,
+          "end": 24,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 33,
+          "end": 33,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 42,
+          "end": 42,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    },
+    {
+      "path": "docs/wiki/09-comprehensive-code-wiki.md",
+      "type": "MODIFIED",
+      "added": 2,
+      "deleted": 0,
+      "lines": [
+        {
+          "start": 178,
+          "end": 178,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        },
+        {
+          "start": 190,
+          "end": 190,
+          "type": "add",
+          "author_type": "Human",
+          "gen_type": "human"
+        }
+      ]
+    }
+  ],
+  "generated_by": "blamely 0.1.0"
+}
