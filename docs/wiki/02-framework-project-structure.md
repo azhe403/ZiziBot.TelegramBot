@@ -4,7 +4,7 @@
 
 The solution contains two projects (library + sample app):
 
-- [ZiziBot.TelegramBot.sln](../../ZiziBot.TelegramBot.sln)
+- [ZiziBot.TelegramBot.slnx](../../ZiziBot.TelegramBot.slnx)
 - Framework library: [ZiziBot.TelegramBot.Framework.csproj](../../ZiziBot.TelegramBot.Framework/ZiziBot.TelegramBot.Framework.csproj)
 - Sample host: [ZiziBot.TelegramBot.Sample.csproj](../../ZiziBot.TelegramBot.Sample/ZiziBot.TelegramBot.Sample.csproj)
 

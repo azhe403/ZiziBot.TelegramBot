@@ -7,7 +7,7 @@
 - Maintain cognitive complexity below thresholds by extracting complex methods into smaller, focused functions
 - Repo-level formatting defaults: LF line endings, UTF-8, trimmed trailing whitespace, file-scoped namespaces in C#, 4-space indentation for `.cs`, 2-space indentation for JSON
 - ReSharper settings prefer explicit object creation types when the type is not obvious
-- Use `.slnx` for solution-level work (canonical solution file). The legacy `.sln` still exists but should not be used for new work.
+- Use `.slnx` for solution-level work (canonical solution file). The legacy `.sln` has been fully removed.
 - Do not commit real bot tokens, webhook keys, or other secrets to the repository
 - Prefer environment variables for local configuration
 - Add XML documentation comments to public APIs in the framework library
